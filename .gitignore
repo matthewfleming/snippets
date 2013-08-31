@@ -1,0 +1,22 @@
+# Composer
+composer.phar
+composer.lock
+
+# IDE files
+*.sw[op]
+/nbproject/
+.idea/
+.project
+.settings
+
+# Ant files
+cache.properties
+build/
+
+# OS X
+._*
+.DS_Store
+.Trashes
+
+# SASS
+.sass-cache/
