@@ -19,12 +19,13 @@ $names = array(
     "d'angelo-mcdonald" => "D'Angelo-McDonald",
     "mcdonald-d'angelo" => "McDonald-D'Angelo",
     "Bob's Grill" => "Bob's Grill",
-    "r.e. block & sons" => "R.E. Block & Sons"
+    "'Super' autos" => "'Super' Autos",
+    "r.e. block & sons (inc.)" => "R.E. Block & Sons (Inc.)",
 );
 
 foreach ($names as $in => $out) {
     $transformed = StringFunctions::nameProperCase($in);
-    $matches = ($transformed === $out) ? 'pass' : 'fail';
+    $matches = ($transformed === $out) ? 'PASS' : 'FAIL';
 
-    print '"' . $in . '": "' . $transformed .  '" (' . $matches . ")\n";
+    print '"' . $in . '": "' . $transformed .  '" <<' . $matches . ">>\n";
 }

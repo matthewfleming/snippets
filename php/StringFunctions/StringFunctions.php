@@ -17,11 +17,11 @@ class StringFunctions
 
         $lower = strtolower($string);
 
-        // tokenize "words" around whitespace, and '-. characters
-        $words = preg_split("/([\\s\\-.']+)/", $lower, -1, PREG_SPLIT_DELIM_CAPTURE);
+        // tokenize "words" around characters that are not letters (whitespace & symbols - including '-. characters
+        $words = preg_split("/(\P{L}+)/", $lower, -1, PREG_SPLIT_DELIM_CAPTURE);
         $length = count($words);
 
-        // replace words with ucfirst copy
+        // replace words with ucfirst copy (evens are "words", odds are tokens)
         for ($i = 0; $i < $length; $i += 2) {
             $word = $words[$i];
 
