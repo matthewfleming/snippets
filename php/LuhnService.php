@@ -53,10 +53,10 @@ class LuhnService
     public static function validate($value)
     {
         if (null === $value || '' === $value) {
-            throw new \Exception('$value must not be empty');
+            return false;
         }
         if (!is_numeric($value)) {
-            throw new \Exception('$value must be numeric: ' . $value);
+            return false;
         }
         $length = strlen($value);
         $oddLength = $length % 2;
