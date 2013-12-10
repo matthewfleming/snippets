@@ -1,0 +1,18 @@
+--- Create a chroot jail in SELinux
+
+mkdir -P /home/jail/home/dtisync
+chown dtisync:dtisync /home/jail/home/dtisync
+chmod 700 /home/jail/home/dtisync
+restorecon -R -v /home/jail
+setsebool -P ssh_chroot_rw_homedirs on
+
+vim /etc/ssh/sshd_config
+# override default of no subsystems
+# Subsystem  sftp    /usr/libexec/openssh/sftp-server
+Subsystem       sftp    internal-sftp
+
+Match Group sftp
+    ChrootDirectory /home/jail
+    ForceCommand internal-sftp
+    X11Forwarding no
+    AllowTcpForwarding no
