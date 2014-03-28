@@ -6,21 +6,35 @@ class Context {
     const STRUCTURE_NONE = 0;
     const STRUCTURE_TABLE = 1;
     const STRUCTURE_FORMATTED = 2;
+    const STRUCTURE_HEADING = 3;
 
     public $structure;
+
+    public function isUnstructured() {
+        return ($this->structure === self::STRUCTURE_NONE);
+    }
+
+    public function isFormatted() {
+        return ($this->structure === self::STRUCTURE_FORMATTED);
+    }
 }
 
 class Parser
 {
     const INPUT_FILE_NAME = 'input.xml';
     const OUTPUT_FILE_NAME = 'output.wiki';
-    const H2 = 50;
-    const H3 = 40;
-    const H4 = 30;
-    const H5 = 20;
+    const HEADING_MAX_LEVEL = 5;
+    const H2 = 40;
+    const H3 = 20;
+    const H4 = 15;
+    const H5 = 15;
     const EQUALITY_QUANTUM = 1;
     const IGNORE_POSITION_LEFT = 600;
     const IGNORE_POSITION_TOP = 100;
+    const FORMATTED_TEXT_THRESHHOLD = 157;
+    const HARD_LEFT = 135;
+    const FORMATTED_TEXT_SPACE_SIZE = 7;
+    
     static $IGNORE_LIST_MATH = array(
         "Preliminary Copy"
     );
@@ -43,7 +57,7 @@ class Parser
 
     /**
      *
-     * @var string[int]
+     * @var int[int]
      */
     public $fonts;
 
@@ -61,7 +75,7 @@ class Parser
 
         foreach ($fontspecs as $fontspec) {
             $attributes = $fontspec->attributes();
-            $size = $attributes['size'];
+            $size = (int)$attributes['size'];
 
             if ($size >= self::H2) {
                 $level = 2;
@@ -72,10 +86,12 @@ class Parser
             } else if ($size >= self::H5) {
                 $level = 5;
             } else {
-                $level = 6;
+                $level = 0;
             }
             $fonts[(int) $attributes['id']] = $level;
         }
+        
+        $this->fonts = $fonts;
     }
 
     /**
@@ -105,8 +121,31 @@ class Parser
      * @param \SimpleXMLElement $node
      */
     public function endTableRow($node) {
+        $out = $this->continueTableRow($node);
         $this->context->structure = Context::STRUCTURE_NONE;
-        return $this->continueTableRow($node) . "|\n";
+        return $out . "|\n";
+    }
+
+    public function startHeader($level) {
+        $out = "=";
+        for($i=$level;$i<=self::HEADING_MAX_LEVEL;$i++) {
+            $out .= '=';
+        }
+        return $out;
+    }
+
+    public function endHeader($level) {
+        return $this->startHeader($level);
+    }
+
+    public function startFormatted() {
+        $this->context->structure = Context::STRUCTURE_FORMATTED;
+        return "<code>\n";
+    }
+
+    public function endFormatted() {
+        $this->context->structure = Context::STRUCTURE_NONE;
+        return "</code>\n";
     }
 
     /**
@@ -116,9 +155,14 @@ class Parser
     public function outputText($node, $outputBold = true, $isChild = false) {
         $out = "";
         if($node->count()) {
-            foreach($node->children() as $child) {
-                $out .= $this->outputText($child, $outputBold, true) . " ";
-            }
+            $xpath = $node->xpath('.');
+            $xml = $xpath[0]->asXML();
+            
+            
+            $innerXml = preg_replace('/<\/?text.*?>/', '', $xml);
+            
+
+            $out .= html_entity_decode($innerXml);
         } else {
             $out = (string)$node;
         }
@@ -130,6 +174,11 @@ class Parser
                 return "";
             }
         }
+        // Wiki escaping
+        $out = preg_replace('/(\*+)/', '%%$1%%', $out);
+        $bReplace = $outputBold ? '**' : '';
+        $out = preg_replace('/<\/?b.*?>/', $bReplace, $out);
+
         if(!$isChild) {
             $out .= "\n";
         }
@@ -180,12 +229,13 @@ class Parser
                 $nextTop = (int) $attributesNext['top'];
             }
             //skip header and footer stuff
-            if($this->context->structure === Context::STRUCTURE_NONE && (
+            if($this->context->isUnstructured() && (
                 $left >= self::IGNORE_POSITION_LEFT
                 || $top <= self::IGNORE_POSITION_TOP
             )) {
 
             } else {
+                // Tables
                 if (self::equals($top, $nextTop)) {
                     if ($this->context->structure !== Context::STRUCTURE_TABLE) {
                         $out .= $this->startTableRow($current);
@@ -195,8 +245,35 @@ class Parser
                 } else if ($this->context->structure === Context::STRUCTURE_TABLE) {
                     $out .= $this->endTableRow($current);
                 } else {
-                    //a normal line
-                    $out .= $this->outputText($current);
+                    // Headings
+                    $headingLevel = $this->fonts[(int)$attributes['font']];
+
+                    if($headingLevel > 0) {
+                        $heading = $this->outputText($current,false,true);
+                        if($heading) {
+                            $out .= $this->startHeader($headingLevel) . ' ' . $heading . ' ' 
+                                . $this->endHeader($headingLevel) . "\n";
+                        }
+                    } else {
+                        if($left >= self::FORMATTED_TEXT_THRESHHOLD) {
+                            // Formatted Text
+                            if(!$this->context->isFormatted()) {
+                                $out .= $this->startFormatted();
+                            }
+                            $spaces = (int)($left - self::HARD_LEFT )/self::FORMATTED_TEXT_SPACE_SIZE;
+                            $space = '';
+                            for($j=0;$j<$spaces;$j++) {
+                                $space .= ' ';
+                            }
+                            $out .= $space . $this->outputText($current);
+                        } else {
+                            //a normal line
+                            if($this->context->isFormatted()) {
+                                $out .= $this->endFormatted();
+                            }
+                            $out .= $this->outputText($current);
+                        }
+                    }
                 }
             }
             if($next) {
