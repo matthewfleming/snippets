@@ -5,6 +5,7 @@ namespace matthewfleming\xml_to_html;
 class Context {
     const STRUCTURE_NONE = 0;
     const STRUCTURE_TABLE = 1;
+    const STRUCTURE_FORMATTED = 2;
 
     public $structure;
 }
@@ -18,10 +19,15 @@ class Parser
     const H4 = 30;
     const H5 = 20;
     const EQUALITY_QUANTUM = 1;
-    const IGNORE_POSITION = 600;
-    static $IGNORE_LIST = array(
+    const IGNORE_POSITION_LEFT = 600;
+    const IGNORE_POSITION_TOP = 100;
+    static $IGNORE_LIST_MATH = array(
         "Preliminary Copy"
     );
+    static $IGNORE_LIST_REGEX = array(
+        "/^\s*REV ..\/..\/../"
+    );
+
 
     /**
      *
@@ -40,6 +46,12 @@ class Parser
      * @var string[int]
      */
     public $fonts;
+
+    public function __construct()
+    {
+        $this->context = new Context();
+        $this->context->structure = Context::STRUCTURE_NONE;
+    }
 
     public function parseFonts()
     {
@@ -71,6 +83,7 @@ class Parser
      * @param \SimpleXMLElement $node
      */
     public function startTableRow($node) {
+        $this->context->structure = Context::STRUCTURE_TABLE;
         return $this->continueTableRow($node);
     }
 
@@ -92,6 +105,7 @@ class Parser
      * @param \SimpleXMLElement $node
      */
     public function endTableRow($node) {
+        $this->context->structure = Context::STRUCTURE_NONE;
         return $this->continueTableRow($node) . "|\n";
     }
 
@@ -108,8 +122,13 @@ class Parser
         } else {
             $out = (string)$node;
         }
-        if(in_array($out, self::$IGNORE_LIST)) {
+        if(in_array($out, self::$IGNORE_LIST_MATH)) {
             return "";
+        }
+        foreach(self::$IGNORE_LIST_REGEX as $regex) {
+            if(preg_match($regex, $out)) {
+                return "";
+            }
         }
         if(!$isChild) {
             $out .= "\n";
@@ -143,40 +162,50 @@ class Parser
             return $attributesA['top'] - $attributesB['top'];
         });
 
-        $inTable = false;
         $i = 0;
         $end = count($nodes) - 1;
         $current = $nodes[0];
         $attributes = $current->attributes();
+        $top = (int) $attributes['top'];
+        $left = (int) $attributes['left'];
 
-        while (true) {
+        while ($i <= $end) {
             if($i == $end) {
-                break;
-            }
-            $next = $nodes[$i + 1];
-            $attributesNext = $next->attributes();
-
-            $top = (int) $attributes['top'];
-            $nextTop = (int) $attributesNext['top'];
-
-            if (self::equals($top, $nextTop)) {
-                if ($inTable == false) {
-                    $out .= $this->startTableRow($current);
-                    $inTable = true;
-                } else {
-                    $out .= $this->continueTableRow($current);
-                }                
-            } else if ($inTable == true) {
-                //end a table row
-                $out .= $this->endTableRow($current);
-                $inTable = false;
+                $next = null;
+                $attributesNext = null;
+                $nextTop = 0;
             } else {
-                //a normal line
-                $out .= $this->outputText($current);                
+                $next = $nodes[$i + 1];
+                $attributesNext = $next->attributes();
+                $nextTop = (int) $attributesNext['top'];
             }
-            //move to the next node
-            $current = $next;
-            $attributes = $attributesNext;
+            //skip header and footer stuff
+            if($this->context->structure === Context::STRUCTURE_NONE && (
+                $left >= self::IGNORE_POSITION_LEFT
+                || $top <= self::IGNORE_POSITION_TOP
+            )) {
+
+            } else {
+                if (self::equals($top, $nextTop)) {
+                    if ($this->context->structure !== Context::STRUCTURE_TABLE) {
+                        $out .= $this->startTableRow($current);
+                    } else {
+                        $out .= $this->continueTableRow($current);
+                    }
+                } else if ($this->context->structure === Context::STRUCTURE_TABLE) {
+                    $out .= $this->endTableRow($current);
+                } else {
+                    //a normal line
+                    $out .= $this->outputText($current);
+                }
+            }
+            if($next) {
+                //move to the next node
+                $current = $next;
+                $attributes = $attributesNext;
+                $top = (int) $attributes['top'];
+                $left = (int) $attributes['left'];
+            }
             $i++;
         }
         return $out;
