@@ -1,0 +1,1429 @@
+===== Circulation API =====
+===== 2013 User Guide =====
+<code>
+        © 2013 Digital Technology International. Circulation API.
+        Even though Digital Technology International (DTI) has tested the software and reviewed the documentation, Digital 
+        Technology International makes no warranty or representation, either express or implied, with respect to this software, 
+        its quality, performance, or fitness for a particular purpose.
+        In no event will Digital Technology International be liable for direct, indirect, special, incidental, or consequential 
+        damages resulting from any defect in the software or its documentation, even if advised of the possibility of such dam-
+        ages. In particular, Digital Technology International shall have no liability for any programs or data stored in or used 
+        with the Digital Technology International system, including the costs of recovering such programs or data.
+        Portions of Adobe InDesign contain an implementation of the LZW algorithm licensed under U.S. Patent 4,558,302.
+        All Digital Technology International products mentioned in this guide are protected under registered trademarks and 
+        all rights are reserved. Other product names are trademarks of their respective manufacturers.
+        Any and/or all sections of this manual may be duplicated for training purposes. 
+        Prior permission is not needed from Digital Technology International.
+        This guide and the software described in it are copyrighted material. All rights are reserved.
+        Digital Technology International, 1180 N. Mountain Springs Parkway, Springville UT 84663. www.dtint.com.
+</code>
+==== Contents ====
+| Introduction | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4 |
+| Requirements | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  4 |
+| URL Query Strings | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  5 |
+| XML Document Responses | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  5 |
+| Circulation API Processes |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6 |
+| Find an Address or Occupant (addrocc) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7 |
+| Cleanse an Address (postace) | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9 |
+| Add an Address/Occupant (addaddrocc) | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 |
+| Update an Occupant (modocc) | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 |
+| Get Subscription Information (subocc) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 |
+| Find a Campaign (campaign) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25 |
+| Find Multiple Campaigns (MCampaign) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 |
+| Create a Subscription | . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 |
+| Create a Billing Change |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31 |
+| Create a Delivery Schedule Change |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32 |
+| Create a Payment (payment) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33 |
+| Create a Task (task) |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35 |
+| Create a Combo Change |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36 |
+| Appendix--Error Codes |  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37 |
+=== Introduction ===
+^ Note:  | The Circulation API is a licensed add-on option. You must contact DTI to obtain a password. |
+The Circulation API provides a programmable interface to some customer service features of 
+Circulation. It provides access to address, occupant, and subscription information and the ability to 
+start a subscription. 
+This could be useful when integrated with other DTI products to enable the use of tablet computers 
+to view paid, online content. Typically, a free application (i.e., "app") is made available, which will 
+allow users to access their online newspaper. As well, a metered paywall could be used to limit the 
+amount of free content provided, after which a customer will be asked to start a subscription to 
+continue reading. 
+The structure of the deployed Circulation API is depicted below. 
+Requirements
+To use the Circulation API, the following must be in place:
+<code>
+    Circulation 2011 or higher is required.
+</code>
+**· **
+<code>
+    The Circulation API must be purchased and installed on your DTI server. "Integration API" 
+</code>
+**· **
+<code>
+    must be activated using the Add On Activation option in Circulation.
+    A web server must be available and installed in a location where it can communicate with 
+</code>
+**· **
+<code>
+    WebSpeed.
+    Household Management must be installed and running.
+</code>
+**· **
+<code>
+    The Circulation API is a generic interface. You must enable your application to submit a request 
+</code>
+**· **
+<code>
+    to your web server, read the resulting XML, and parse it for content. The request inputs and XML 
+    tags are listed later in this document.
+</code>
+<code>
+    Once it is set up, the Circulation API must be tested. A browser can be used to input information 
+</code>
+**· **
+<code>
+    to the Circulation API and view responses for troubleshooting purposes. 
+</code>
+URL Query Strings
+The application sends information to the Circulation API via URL query strings--basically a URL 
+(web address) plus a number of parameters. You will need to use the appropriate method (based on 
+your environment) to make a URL request. Each request must use the correct URL and parameters 
+specified for each transaction. For example, when passing the subscriber's phone number and last 
+name to the Circulation API (in order to locate the subscriber in Circulation), the URL must be: 
+<hostname>/cgi-bin/hm_hm.sh/interface/adplus/lib/interface?ActionType=
+<code>
+                               
+</code>
+RunProg&Progname=addrocc
+| where  |  is the host name of the web server. Two parameters, PhoneNumber and  |
+<code>
+       <hostname>
+</code>
+LastName must also be passed. There must be a question mark (?) between the URL and first 
+parameter and an ampersand (&) between each subsequent parameter. So, the entire URL query 
+string will look like this:
+<hostname>/cgi-bin/hm_hm.sh/interface/adplus/lib/interface?ActionType=
+RunProg&Progname=addrocc&PhoneNumber=6519382881&LastName=Smith
+The processes and input parameters are described later in this document, starting on page 7.
+XML Document Responses
+The Circulation API returns information in a standard XML document. The response status and 
+returned information is embedded within XML elements. In the following example, the return 
+status is contained in the ReturnStatus element (between the <ResponseStatus> opening tag and the 
+</ResponseStatus> closing tag), which is embedded within the <CompletionStatus> element. The 
+returned occupant and address IDs are returned within their own respective elements, and all of 
+these are embedded within the <SubscriptionInformation> element.
+<code>
+    <SubscriptionInformation>
+       <CompletionStatus>
+          <ReturnStatus>**Completed**</ReturnStatus> 
+       </CompletionStatus>
+       <OccupantID>**2038478**</OccupantID> 
+       <AddressID>**2024681**</AddressID> 
+    </SubscriptionInformation>
+</code>
+A Circulation API client must parse the returned XML document and consult the ReturnStatus 
+elements to determine if the request succeeded or failed. If the ReturnStatus indicates that the 
+response failed, the client may retrieve the error code and message sub-elements and use them in 
+handling the error appropriately. If the ReturnStatus indicates that the response succeeded, the client 
+must extract the data it needs from the remainder of the XML document.
+How the returned XML document is handled will vary based on the development environment and 
+needs of your Circulation API client. Most modern development environments contain built-in 
+support for parsing XML documents in one or more ways. You will need to use the appropriate 
+approach for parsing the XML document, based on your development environment and Circulation 
+API client's needs.
+=== Circulation API Processes ===
+The following processes are used to exchange information between the Circulation API module and 
+DTI Circulation:
+^ Program Name (Progname) ^ Page |
+| Find an Address or Occupant (addrocc) | page 7 |
+| Cleanse an Address (postace) | page 9 |
+| Add an Address/Occupant (addaddrocc) | page 16 |
+| Update an Occupant (modocc) | page 18 |
+| Get Subscription Information (subocc) | page 21 |
+| Find a Campaign (campaign) | page 25 |
+| Create a Subscription | page 29 |
+| Create a Billing Change | page 31 |
+| Create a Payment (payment) | page 33 |
+| Create a Task (task) | page 35 |
+| Create a Combo Change | page 36 |
+=== Find an Address or Occupant (addrocc) ===
+This process (addrocc) returns occupant and address information that matches the search input 
+provided (such as phone number and last name). 
+If multiple sets of information match, multiple sets of results will be returned unless ExactMatch is 
+included in the input parameters. When ExactMatch is used, results will be returned only if a single 
+match is found.
+Input Parameters:
+OccupantID
+**·  **
+^ ·   | AddressID |
+HouseNumber
+**·  **
+PreDirectional
+**·  **
+StreetName
+**·  **
+^ ·   | StreetSuffixID |
+PostDirectional
+**·  **
+UnitDesignatorID
+**·  **
+UnitNumber
+**·  **
+^ ·   | ZipCode |
+LevelDesignatorID
+**·  **
+LevelNumber
+**·  **
+Email
+**·  **
+^ ·   | WebPassword |
+Phone
+**·  **
+AreaCode
+**·  **
+FirstName
+**·  **
+^ ·   | LastName |
+ExactMatch
+**·  **
+OccupantInclusive (first and last name must match)
+**·  **
+ExactZip (ZIP Code must match)
+**·  **
+^ ·   | User (required) |
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals addrocc
+**·  **
+Returned XML Tags:
+^ XML Tag ^ Description |
+| <SubscriptionInformation> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <OccupantID> | ID of the occupant submitted |
+| <AddressID> | ID of the address submitted |
+| <NumRecs> | The number of results that match the input parameters submitted |
+^ XML Tag ^ Description |
+| <OccupantAddressList> | Contains the OccupantAddress tags |
+| <OccupantAddress> | Contains the address elements described below |
+| <Name1> | First name |
+| <Name2> | Last name |
+| <PhoneNumber> | Phone number |
+| <OccupantID> | ID of the occupant found |
+| <AddressLine1> | Line 1 of the address (i.e., street address) |
+| <City> | City |
+| <State> | State |
+| <ZipCode> | Zip or postal code |
+| <AddressID> | ID of the address found |
+| <Email> | Email address of the occupant submitted |
+| <WebPage> | Occupant's web page |
+| <MatchStatus> | Matched on occupant (O), address (A) or both (B) |
+Example XML:
+<SubscriptionInformation>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <OccupantID>**580**</OccupantID> 
+    <AddressID>**0**</AddressID> 
+    <NumRecs>**1**</NumRecs> 
+    <OccupantAddressList>
+       <OccupantAddress>
+          <Name1>**Julian**</Name1> 
+          <Name2>**Banks**</Name2> 
+          <PhoneNumber>**(555)343-3727**</PhoneNumber> 
+          <OccupantID>**580**</OccupantID> 
+          <AddressLine1>**2509 WASHINGTON ST E APT 1**</AddressLine1> 
+          <City>**CHARLESTON**</City> 
+          <State>**WV**</State> 
+          <ZIPCode>**25311-2316**</ZIPCode> 
+          <AddressID>**2024296**</AddressID> 
+          <Email>**julian.banks@email.com**</Email>
+          <WebPage>**www.julianbanks.com**</WebPage>
+          <MatchStatus>B</MatchStatus>
+       </OccupantAddress>
+    </OccupantAddressList>
+</code>
+</SubscriptionInformation>
+=== Cleanse an Address (postace) ===
+This process (postace) is used to cleanse the subscriber's address using ACE.
+Input Parameters:
+DoSuggestionList
+**·  **
+PriorRecord
+**·  **
+^ ·   | DoRangeCheck |
+^ ·   | OtherName |
+HouseNumber
+**·  **
+HouseNumberModifier
+**·  **
+^ ·   | PreDirectional |
+^ ·   | StreetName |
+StreetSuffixID
+**·  **
+PostDirectional
+**·  **
+^ ·   | UnitDesignatorID |
+^ ·   | UnitNumber |
+DualAddress
+**·  **
+CityID
+**·  **
+^ ·   | CountyID |
+^ ·   | StateID |
+CountryID
+**·  **
+ZipCode
+**·  **
+ZipExtension
+**·  **
+^ ·   | ZipBarCode |
+^ ·   | PORouteType |
+PORouteNumber
+**·  **
+UseACE
+**·  **
+^ ·   | ActionType--always equals RunProg |
+^ ·   | ProgName--always equals postace |
+XML Tags (When CitySuggestionList):
+The following XML tags are returned when the submitted city/state combination is not found in the 
+database. ACE suggests alternate city/state combinations.
+^ XML Tag ^ Description |
+| <CleansedAddress> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <CitySuggestion> | Contains CitySuggestionList (list of suggested cities returned from ACE) |
+| <CitySuggestionList> | Contains the city information below for each city being suggested by ACE |
+| <CityID> | Name of the city |
+| <StateID> | Abbreviation of the state |
+| <ZipCode> | Zip/postal code |
+Example XML (When CitySuggestionList):
+<CleansedAddress>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <ErrorCode>**1**</ErrorCode> 
+    <ErrorMessage /> 
+    <CitySuggestion>
+       <CitySuggestionList>
+          <CityID>**BAGLEY**</CityID> 
+          <StateID>**WI**</StateID> 
+          <ZipCode>**53801**</ZipCode> 
+       </CitySuggestionList>
+       <CitySuggestionList>
+          <CityID>**BAYSIDE**</CityID> 
+          <StateID>**WI**</StateID> 
+          <ZipCode>**53217**</ZipCode> 
+       </CitySuggestionList>
+       <CitySuggestionList>
+          <CityID>**BAYVIEW**</CityID> 
+          <StateID>**WI**</StateID> 
+          <ZipCode>**53207**</ZipCode> 
+       </CitySuggestionList>
+    </CitySuggestion>
+</code>
+</CleansedAddress>
+XML Tags (When AddrSuggestionList):
+The following XML tags are returned when the house number submitted is not valid for the street 
+entered. ACE suggests alternate range/street name combinations.
+^ XML Tag ^ Description |
+| <CleansedAddress> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <AddrSuggestion> | Contains AddrSuggestionList |
+| <AddrSuggestionList> | Contains the address information below for each address suggested by ACE |
+| <PrimaryRange> | Range of unit numbers |
+| <PreDirectional> | Address predirectional, such as "south," "north," etc. |
+| <StreetName> | Street name |
+| <StreetSuffix> | Street suffix, such as "lane," "parkway," "boulevard," etc. |
+| <PostDirectional> | Address postdirectional, such as "south," "north," etc. |
+^ XML Tag ^ Description |
+| <ZipCode> | Zip or postal code |
+| <OddEven> | O (odd), E (even), or B (both) |
+Example XML (When AddrSuggestionList):
+<CleansedAddress>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <ErrorCode>**2**</ErrorCode> 
+    <ErrorMessage /> 
+    <AddrSuggestion>
+       <AddrSuggestionList>
+          <PrimaryRange>**30 32**</PrimaryRange> 
+          <StreetName>**COUNTY ROAD P**</StreetName> 
+          <ZipCode>**53801**</ZipCode> 
+          <OddEven>**E**</OddEven> 
+       </AddrSuggestionList>
+       <AddrSuggestionList>
+          <PrimaryRange>**10400 10498**</PrimaryRange> 
+          <StreetName>**COUNTY ROAD A**</StreetName> 
+          <ZipCode>**53801**</ZipCode> 
+          <OddEven>**E**</OddEven> 
+       </AddrSuggestionList>
+       <AddrSuggestionList>
+          <PrimaryRange>**10600 10698**</PrimaryRange> 
+          <StreetName>**COUNTY ROAD A**</StreetName> 
+          <ZipCode>**53801**</ZipCode> 
+          <OddEven>**E**</OddEven> 
+       </AddrSuggestionList>
+    </AddrSuggestion> 
+</code>
+</CleansedAddress>
+XML Tags (When SecondaryList):
+The following XML tags are returned when the unit number does not match the unit type submitted. 
+^ XML Tag ^ Description |
+| <CleansedAddress> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <PSErrorCode> | The error code returned from ACE |
+^ XML Tag ^ Description |
+| <SecondarySuggestion> | Contains the secondary suggestion list |
+| <SecondarySuggestionList> | Contains each suggested unit/type combination |
+| <SecondaryRange> | Unit range |
+| <SecondaryType> | Unit type |
+| <SecondaryOddEven> | O (odd), E (even), or B (both) |
+Example XML (When SecondaryList):
+<CleansedAddress>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <PSErrorCode>**0**</ErrorCode> 
+    <SecondarySuggestion>
+       <SecondarySuggestionList>
+          <SecondaryRange>**10 18**</SecondaryRange> 
+          <SecondaryType>**Apt**</SecondaryType> 
+          <SecondaryOddEven>**E**</SecondaryOddEven> 
+       </SecondarySuggestionList>
+       <SecondarySuggestionList>
+          <SecondaryRange>**20 28**</SecondaryRange> 
+          <SecondaryType>**Apt**</SecondaryType> 
+          <SecondaryOddEven>**E**</SecondaryOddEven> 
+       </SecondarySuggestionList>
+       <SecondarySuggestionList>
+          <SecondaryRange>**30 38**</SecondaryRange> 
+          <SecondaryType>**Apt**</SecondaryType> 
+          <SecondaryOddEven>**E**</SecondaryOddEven> 
+       </SecondarySuggestionList>
+    </SecondarySuggestion>
+</code>
+</CleansedAddress>
+XML Tags (When CleansedAddress):
+The following XML tags are returned when a valid, cleansed address is received from ACE.
+^ XML Tag ^ Description |
+| <CleansedAddress> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+Address elements that have been cleansed by ACE:
+| <PSErrorCode> | The error code returned from ACE |
+^ XML Tag ^ Description |
+| <PSCountryID> | Country |
+| <PSHouseNumber> | House number |
+| <PSHouseNumberModifier> | Fractional or alphabetic house number modifier (e.g., 1/2, a, b) |
+| <PSPreDirectional> | Address predirectional, such as "south," "north," etc. |
+| <PSStreetName> | Street name |
+| <PSStreetSuffixID> | Street suffix, such as "lane," "parkway," "boulevard," etc. |
+| <PSPostDirectional> | Address postdirectional, such as "south," "north," etc. |
+| <PSUnitDesignatorID> | Unit type, such as Apt, Lot, Room, Suite, etc. |
+| <PSUnitNumber> | Unit number |
+| <PSDualAddress> | Indicates the dual address, if appropriate |
+| <PSCityID> | City |
+| <PSStateID> | State |
+| <PSZipCode> | Zip or postal code |
+| <PSZipExtension> | Zip or postal code extension |
+| <PSZipBarCode> | Delivery point bar code from ACE |
+| <PSPORouteType> | Post office route type |
+| <PSPORouteNumber> | Post office route number |
+| <PSUSPSCountyCode> | USPS county |
+| <PSCountyID> | County |
+| <PSCongressionalDistrict> | Congressional district |
+| <PSLot> | Lot |
+| <PSLotSequence> | Lot sequence number |
+| <PSLacsCode> | Code returned by LacsLink. Possible values are: |
+<code>
+                            "yes"--Address needs 9-1-1 conversion (from box to street 
+                           **·  **
+                            address) and should be submitted to a LACS vendor.
+                            "no"--Address does not need conversion or address was not 
+                           **·  **
+                            assigned.
+| <PSDPVStatus> | Status returned by DPV. Possible values are: |
+<code>
+                            Y--The address is a confirmed delivery point.  The primary range 
+                           **·  **
+                            and secondary range (if present) are valid.
+^ ·   | N--The address is not a valid delivery point. |
+^ ·   | S--The primary range is a valid delivery point, but the parsed  |
+<code>
+                            secondary range is not valid in the DPV directory.
+                            D--The primary range is a valid delivery point, but the secondary 
+                           **·  **
+                            range data is not available on input.
+^ ·   | L--This address triggered DPV locking. |
+^ XML Tag ^ Description |
+| <PSAddrDPV> | "Yes" or "no," depending on the setting of the Business Rule, <i>If </i> |
+<code>
+                           <i>using ACE, will you be using the Delivery Point Validation (DPV) </i>
+                           <i>add-on software?</i>
+| <PSAddrLACSLink> | "Yes" or "no," depending on the setting of the Business Rule, <i>If </i> |
+<code>
+                           <i>using ACE, will you be using the Locatable Address Conversion </i>
+                           <i>System (LACSLink) add-on software?</i>
+| <PSDeliverable> | "Yes" or "no"--Whether the address is deliverable. |
+Example XML (When CleansedAddress):
+<CleansedAddress> 
+<code>
+    <CompletionStatus> 
+       <ReturnStatus>**Completed**</ReturnStatus> 
+       <ErrorMessage>**, E601: Primary number does not DPV confirm, **
+^ ZIP+4 removed. | </ErrorMessage>  |
+<code>
+    </CompletionStatus> 
+    <PSErrorCode>**0**</PSErrorCode> 
+    <PSCountryID>**US**</PSCountryID> 
+    <PSHouseNumber>**13005**</PSHouseNumber> 
+    <PSHouseNumberModifier /> 
+    <PSPreDirectional /> 
+    <PSStreetName>**COUNTY ROAD C**</PSStreetName> 
+    <PSStreetSuffixID /> 
+    <PSPostDirectional /> 
+    <PSUnitDesignatorID /> 
+    <PSUnitNumber /> 
+    <PSDualAddress /> 
+    <PSCityID>**BAGLEY**</PSCityID> 
+    <PSStateID>**WI**</PSStateID> 
+    <PSZipCode>**53801**</PSZipCode> 
+    <PSZipExtension /> 
+    <PSZipBarCode /> 
+    <PSPORouteType>**R**</PSPORouteType> 
+    <PSPORouteNumber>**1**</PSPORouteNumber> 
+    <PSUSPSCountyCode>**43**</PSUSPSCountyCode> 
+    <PSCountyID>**GRANT**</PSCountyID> 
+    <PSCongressionalDistrict>**3**</PSCongressionalDistrict> 
+    <PSLot>**0**</PSLot> 
+    <PSLotSequence /> 
+    <PSLacsCode>**no**</PSLacsCode> 
+    <PSDPVStatus>**N**</PSDPVStatus> 
+    <PSAddrDPV>**yes**</PSAddrDPV> 
+    <PSAddrLACSLink>**yes**</PSAddrLACSLink> 
+    <PSDeliverable>**no**</PSDeliverable> 
+</code>
+</CleansedAddress>
+XML Tags (When Error):
+The following XML tags are returned when an error is received from ACE.
+^ XML Tag ^ Description |
+| <CleansedAddress> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+Example XML (When Error):
+<CleansedAddress>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Error**</ReturnStatus> 
+       <ErrorCode>**4**</ErrorCode> 
+       <ErrorMessage>**ACE/CACE Error, E412: Street name not found in**
+^ directory. | </ErrorMessage>  |
+<code>
+    </CompletionStatus>
+</code>
+</CleansedAddress>
+=== Add an Address/Occupant (addaddrocc) ===
+This process (addaddrocc) is used to add a new address and/or occupant record. Addresses and 
+occupants can be added separately.
+Input Parameters:
+AddressID (required)
+**·  **
+^ ·   | OccupantID (required) |
+PreviousAddressID
+**·  **
+NoAddress--Skip address creation? (T/F)
+**·  **
+HouseNumber
+**·  **
+^ ·   | HouseNumberModifier |
+PreDirectional
+**·  **
+StreetName
+**·  **
+StreetSuffixID
+**·  **
+^ ·   | PostDirectional |
+Complex
+**·  **
+Building
+**·  **
+UnitDesignatorID
+**·  **
+^ ·   | UnitNumber |
+CityID
+**·  **
+CountyID
+**·  **
+StateID
+**·  **
+^ ·   | CountryID |
+ZipCode
+**·  **
+ZipBarCode
+**·  **
+PORouteType
+**·  **
+^ ·   | PORouteNumber |
+PORouteWalkSequence
+**·  **
+CongressionalDistrict
+**·  **
+Lot
+**·  **
+^ ·   | LotSequence |
+DwellingTypeID
+**·  **
+DwellingStatusID
+**·  **
+DwellingStatusDate
+**·  **
+^ ·   | DualAddress |
+MailAccessible
+**·  **
+RouteAccessible
+**·  **
+Cleanse
+**·  **
+^ ·   | CleanseDataDate |
+NoOccupant--Skip occupant creation? (T/F)
+**·  **
+FirstName
+**·  **
+MiddleInitial
+**·  **
+^ ·   | LastName |
+Honorific
+**·  **
+OtherName
+**·  **
+OtherNameUsage
+**·  **
+^ ·   | AreaCode |
+Phone
+**·  **
+PhoneUnlisted
+**·  **
+OccupantType
+**·  **
+^ ·   | CreditReviewDate |
+CreditCode
+**·  **
+Instructions
+**·  **
+Email
+**·  **
+^ ·   | WebPassword |
+EncodeMethod (SHA-1, MD5, <BLANK>)--passing this forces the code to assume the password is already encoded
+**·  **
+HomePage
+**·  **
+DPVStatus
+**·  **
+^ ·   | PSAddrDPV |
+PSAddrDLACSLink
+**·  **
+PSAddrKept
+**·  **
+PSAddrReturned
+**·  **
+^ ·   | QASAddressLine[1-6] |
+QASDPID
+**·  **
+QASScore
+**·  **
+QASDataDate
+**·  **
+^ ·   | QASIsOverride |
+User (required)
+**·  **
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals addaddrocc
+**·  **
+XML Tags:
+^ XML Tag ^ Description |
+| <AddressOccupantInformation> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <OccupantID> | ID of the occupant |
+| <AddressID> | ID of the address |
+| <Routeable> | Whether a route can be found for the address |
+Example XML:
+<SubscriptionInformation>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <OccupantID>**2038478**</OccupantID> 
+    <AddressID>**2024681**</AddressID> 
+</code>
+</SubscriptionInformation>
+=== Update an Occupant (modocc) ===
+This process (modocc) is used to update an occupant record.
+Input Parameters:
+OccupantID
+**·  **
+User
+**·  **
+^ ·   | ActionType--always equals RunProg |
+^ ·   | ProgName--always equals modocc |
+Optional Parameters:
+UpdateName (T/F)
+**·  **
+^ ·   | FirstName |
+LastName
+**·  **
+MiddleInitial
+**·  **
+Salutation--will be blanked out if not transmitted
+**·  **
+^ ·   | Honorific--will be blanked out if not transmitted |
+UpdateOtherName (T/F)
+**·  **
+OtherName
+**·  **
+UpdatePhone (T/F)
+**·  **
+^ ·   | HomeAreaCode--both HomeAreaCode and HomePhone must be passed to update the phone number |
+HomePhone
+**·  **
+UpdateOtherPhone (T/F)
+**·  **
+OtherPhoneType--all three phone parameters must be passed to update or add phone numbers
+**·  **
+^ ·   | OtherAreaCode |
+OtherPhone
+**·  **
+OccType--will be created if it does not exist and is not blank
+**·  **
+UpdateEmailMethod (replace, add, none)--when "replace," all existing e-mail addresses will be end-dated and 
+**·  **
+replaced with the list of email addresses provided; when "add," one email address will be added
+Email--comma-separated list of email addresses
+**·  **
+UpdatePassword (T/F)
+**·  **
+WebPassword
+**·  **
+^ ·   | EncodeMethod (SHA-1, MD5, <BLANK>)--passing this forces the code to assume the password is already encoded |
+Verbose (T/F)--when true, returns additional information about the occupant (see Verbose=True XML tags on the next 
+**·  **
+page)
+XML Tags (Verbose = False)
+^ XML Tag ^ Description |
+| <OccupantModify> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <OccupantID> | ID of the occupant |
+Example XML (Verbose = False):
+<OccupantModify>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <OccupantID>**2038478**</OccupantID> 
+</code>
+</OccupantModify>
+XML Tags (Verbose = True)
+^ XML Tag ^ Description |
+| <OccupantModify> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <OccupantID> | ID of the occupant |
+| <FirstName> | First name of the occupant |
+| <LastName> | Last name of the occupant |
+| <MiddleInitial> | Middle initial of the occupant |
+| <Salutation> | Salutation of the occupant (such as Mr., Mrs., Ms., Dr.) |
+| <Honorific> | Honorific of the occupant (such as Jr., PhD, Esq.) |
+| <OccupantType> | Type of occupant (such as regular, senior, business) |
+| <EmailList> | Contains the Email tags |
+| <Email> | Contains the Email elements described below |
+| <EmailAddress> | Email address of the occupant |
+| <PhoneList> | Contains the Phone tags |
+^ XML Tag ^ Description |
+| <Phone> | Contains the phone elements described below |
+| <AreaCode> | Area code of the phone number |
+| <Phone> | Phone number |
+| <PhoneNumberTypeID> | Phone number type |
+Example XML (Verbose = True):
+<OccupantModify>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <OccupantID>**2038478**</OccupantID> 
+    <FirstName>**ALPHONSO**</FirstName>
+    <LastName>**HONN**</LastName>
+    <MiddleInitial>**W**</MiddleInitial>
+    <Salutation>**MR**</Salutation>
+    <Honorific>**JR**</Honorific>
+    <OccupantType>**REGULAR**</OccupantType>
+    <EmailList>
+       <Email>
+          <EmailAddress>**mawjg@alpo.net**</EmailAddress>
+          <StartDate>**08/13/12**</StartDate>
+          <LastUsedDate>**08/13/12**</LastUsedDate>
+       </Email>
+    </EmailList>
+    <PhoneList>
+       <Phone>
+          <AreaCode>**651**</AreaCode>
+          <Phone>**5551234**</Phone>
+          <PhoneNumberTypeID>**Home**</PhoneNumberTypeID>
+       </Phone>
+    </PhoneList>
+</code>
+</OccupantModify>
+=== Get Subscription Information (subocc) ===
+This process (subocc) is used to retrieve information about subscriptions for an address ID and/or 
+occupant ID.
+Input Parameters:
+AddressID (only required if SubscriptionID is not present)
+**·  **
+^ ·   | OccupantID (only required if SubscriptionID is not present) |
+SubscriptionID (only required if AddressID/OccupantID are not present)
+**·  **
+User
+**·  **
+ActionType--always equals RunProg
+**·  **
+^ ·   | ProgName--always equals subocc |
+XML Tags:
+^ XML Tag ^ Description |
+| <SubscriptionInformation> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <OccupantID> | ID of the occupant submitted |
+| <AddressID> | ID of the address submitted |
+| <NumPubs> | Number of publications that are valid for the occupant/address |
+| <NumSub> | Number of subscriptions returned |
+| <SubscriptionList> | Contains all of the subscriptions found |
+| <Subscription> | Opening tag for each subscription found |
+| <SubscriptionID> | ID of the subscription |
+| <SubscribedTo> | "Yes" or "no." Temp stops will appear as "yes"; perm stops will appear as "no." |
+| <ProductID> | ID of the product  |
+| <ProductName> | Name of the product |
+| <DeliveryScheduleID> | ID of the delivery schedule |
+| <DeliveryScheduleDescription> | Description of the delivery schedule |
+| <SubscriberStatus> | Subscriber's status (e.g., temp stop, active) |
+| <BillingMethod> | Subscriber's billing method |
+| <BalanceDue> | Balance due on the subscription |
+| <CreditStatus> | Credit status of the subscriber |
+| <StopReason> | Stop reason associated with the subscription |
+^ XML Tag ^ Description |
+| <MatchType> | A match was found on the O (occupant), A (address), or B (both) |
+| <RateCode> | Rate code of the subscription |
+| <AddressID> | Address ID associated with the subscription |
+| <OccupantID> | Occupant ID associated with the subscription |
+| <DeliveryMethodByDay> | Delivery method for each day of the week |
+<code>
+                             M (mail)
+                           **·  **
+                             O (online)
+                           **·  **
+                             R (route)
+                           **·  **
+^ ·   | H (hybrid - route and online) |
+<code>
+                             X (mixed - mail and route)
+                           **·  **
+                             U (unknown)
+                           **·  **
+| <StoppedDays> | Number of days subscription was stopped |
+| <ComboPrimary> | Indicates whether publication is primary pub of the combo |
+| <IsCombo> | Indicates whether this is part of a combo subscription |
+| <ComboID> | Combo ID, if combo subscription |
+| <PublicationList> | Contains a list of publications that are valid for the occupant/address |
+| <Publication> | Opening tag for each valid publication |
+| <ProductID> | ID of the product  |
+| <ProductName> | Name of the product |
+| <SubscribedTo> | "Yes" or "no." Temp stops will appear as "yes"; perm stops will appear as "no." |
+| <DeliveryScheduleID> | ID of the delivery schedule |
+| <DeliveryScheduleDescription> | Description of the delivery schedule |
+| <isRouteable> | "yes" or "no" indicating if the address is routable |
+Example XML:
+<SubscriptionInformation>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <OccupantID>**6822**</OccupantID> 
+    <AddressID>**6855**</AddressID> 
+    <NumPub>**60**</NumPub> 
+    <NumSub>**2**</NumSub> 
+    <SubscriptionList>
+       <Subscription>
+          <SubscriptionID>**12345**</SubscriptionID> 
+          <SubscribedTo>**yes**</SubscribedTo> 
+          <ProductID>**DM**</ProductID> 
+          <ProductName>**Daily Messenger**</ProductName> 
+          <DeliveryScheduleID>**DS**</DeliveryScheduleID> 
+</code>
+<code>
+          <DeliveryScheduleDescription>**DAILY AND SUNDAY**
+             </DeliveryScheduleDescription> 
+          <SubscriberStatus>**Active**</SubscriberStatus> 
+          <BillingMethod>**Office Pay**</BillingMethod> 
+          <AutomaticRenewal>**no**</AutomaticRenewal> 
+          <OriginalStartDate>**09/01/97**</OriginalStartDate> 
+          <ExpireDate>**02/05/13**</ExpireDate> 
+          <BalanceDue>**15.45**</BalanceDue> 
+          <CreditStatus>**APPROVED**</CreditStatus> 
+          <StopReason>**UNKNOWN**</StopReason> 
+          <MatchType>**O**</MatchType> 
+          <RateCode>**dmDS**</RateCode>
+          <AddressID>**6685**</AddressID> 
+          <OccupantID>**6822**</OccupantID> 
+          <DeliveryMethodByDay>
+             <DeliveryMethodByDay1>**R**</DeliveryMethodByDay1>
+             <DeliveryMethodByDay2>**R**</DeliveryMethodByDay2>
+             <DeliveryMethodByDay3>**R**</DeliveryMethodByDay3>
+             <DeliveryMethodByDay4>**R**</DeliveryMethodByDay4>
+             <DeliveryMethodByDay5>**R**</DeliveryMethodByDay5>
+             <DeliveryMethodByDay6>**R**</DeliveryMethodByDay6>
+             <DeliveryMethodByDay7>**R**</DeliveryMethodByDay7>
+          </DeliveryMethodByDay>
+       </Subscription>
+       <Subscription>
+          <SubscriptionID>**67890**</SubscriptionID> 
+          <SubscribedTo>**yes**</SubscribedTo> 
+          <ProductID>**GZ**</ProductID> 
+          <ProductName>**Daily Gazette**</ProductName> 
+          <DeliveryScheduleID>**SO**</DeliveryScheduleID> 
+          <DeliveryScheduleDescription>**SUNDAY ONLY**
+             </DeliveryScheduleDescription> 
+          <SubscriberStatus>**Active**</SubscriberStatus> 
+          <BillingMethod>**CARRIER COLLECT**</BillingMethod> 
+          <AutomaticRenewal>**no**</AutomaticRenewal> 
+          <OriginalStartDate>**10/27/91**</OriginalStartDate> 
+          <BalanceDue>**0**</BalanceDue> 
+          <CreditStatus>**APPROVED**</CreditStatus> 
+          <StopReason>**UNKNOWN**</StopReason> 
+          <MatchType>**O**</MatchType> 
+          <RateCode>**dmSO**</RateCode>
+          <AddressID>**6685**</AddressID> 
+          <OccupantID>**6822**</OccupantID> 
+          <DeliveryMethodByDay>
+             <DeliveryMethodByDay1>**R**</DeliveryMethodByDay1>
+             </DeliveryMethodByDay2>
+             </DeliveryMethodByDay3>
+             </DeliveryMethodByDay4>
+             </DeliveryMethodByDay5>
+</code>
+<code>
+             </DeliveryMethodByDay6>
+             </DeliveryMethodByDay7>
+          </DeliveryMethodByDay>
+       </Subscription>
+    </SubscriptionList>
+    <PublicationList>
+       <Publication>
+          <ProductID>**AND**</ProductID> 
+          <ProductName>**Andover Daily News**</ProductName> 
+          <SubscribedTo>**no**</SubscribedTo> 
+          <DeliveryScheduleID>**ANDDS**</DeliveryScheduleID> 
+          <DeliveryScheduleDescription>**DAILY AND SUNDAY**
+             </DeliveryScheduleDescription> 
+       </Publication>
+       <Publication>
+          <ProductID>**AND**</ProductID> 
+          <ProductName>**Andover Daily News**</ProductName> 
+          <SubscribedTo>**no**</SubscribedTo> 
+          <DeliveryScheduleID>**ANDMF**</DeliveryScheduleID> 
+          <DeliveryScheduleDescription>**MONDAY - FRIDAY**
+             </DeliveryScheduleDescription> 
+       </Publication>
+       <Publication>
+          <ProductID>**AND**</ProductID> 
+          <ProductName>**Andover Daily News**</ProductName> 
+          <SubscribedTo>**no**</SubscribedTo> 
+          <DeliveryScheduleID>**ANDSATSU**</DeliveryScheduleID> 
+          <DeliveryScheduleDescription>**DAILY AND SUNDAY**
+             </DeliveryScheduleDescription> 
+       </Publication>
+       <Publication>
+          <ProductID>**AND**</ProductID> 
+          <ProductName>**Andover Daily News**</ProductName> 
+          <SubscribedTo>**no**</SubscribedTo> 
+          <DeliveryScheduleID>**ANDSO**</DeliveryScheduleID> 
+          <DeliveryScheduleDescription>**SUNDAY ONLY**
+             </DeliveryScheduleDescription> 
+       </Publication>
+</code>
+...additional publications omitted...
+<code>
+    </PublicationList>
+</code>
+</SubscriptionInformation>
+=== Find a Campaign (campaign) ===
+Finds the best campaign for the given subscription/address/occupant combination.
+Input Parameters:
+OccupantID
+**·  **
+AddressID
+**·  **
+^ ·   | SubscriptionID |
+^ ·   | StartDate |
+EndDate
+**·  **
+ActionType--always equals RunProg
+**·  **
+^ ·   | ProgName--always equals campaign |
+Optional Parameters:
+CampaignCode--If populated, returns information about the specified campaign
+**·  **
+UseCSCampaign--If true/yes, looks for Customer Service campaigns; otherwise, looks for Advertising campaigns.
+**·  **
+XML Tags:
+^ XML Tag ^ Description |
+| <Campaign> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <CampaignID> | ID of the campaign |
+| <ProductID> | ID of the product |
+| <Script> | Campaign script defined for the campaign |
+| <DeliverySchedule> | Delivery schedule of the subscription being offered |
+| <Term> | Term of the subscription being offered |
+| <Length> | Length of the subscription being offered |
+| <Amount> | Cost of the subscription being offered |
+Example XML:
+<Campaign>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <CampaignID>**STUPTST**</CampaignID>
+    <ProductID>**Star**</ProductID>
+    <Script>**Would you like to switch to seven-day delivery for only 5.99**
+^ for seven weeks? | </Script> |
+<code>
+    <DeliverySchedule>**DS**</DeliverySchedule>
+    <Term>**Week**</Term>
+    <Length>**7**</Length>
+    <Amount>**5.99**</Amount>
+</code>
+</Campaign>
+=== Find Multiple Campaigns (MCampaign) ===
+Returns a list of campaigns available to the given subscription ID, address ID/occupant ID 
+combination, address ID (using the Zip code of the address), or Zip code. It can be used to get the 
+details of a specified campaign code.
+^ Note:  | MCampaign is only supported in version 2013.2 and higher |
+Input Parameters:
+UserName
+**·  **
+SubscriptionID
+**·  **
+AddressID
+**·  **
+^ ·   | OccupantID |
+StartDate
+**·  **
+EndDate
+**·  **
+ActionType--always equals RunProg
+**·  **
+^ ·   | ProgName--always equals MCampaign |
+Optional Parameters:
+^ ·   | ZipCode |
+^ ·   | ValidateZipCode--See if passed-in Zip code is in the Zipcode table |
+ProductID--Limit the campaign selections to a given product or show campaigns for a given product
+**·  **
+UseCSCampaigns--Use "Other" (Customer Service) campaigns
+**·  **
+CampaignCode
+**·  **
+XML Tags:
+^ XML Tag ^ Description |
+| <Campaign> | Opening tag |
+| <CompletionStatus> | Contains the Status and any errors |
+| <Status> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <CampaignList> | Contains a list of campaigns for which the subscriber qualifies |
+| <Campaign> | Contains the details of a single campaign |
+| <CampaignCode> | ID of the campaign |
+| <ProductID> | ID of the product |
+| <TransactionType> | The type of transaction defined for the campaign |
+| <Script> | Campaign script defined for the campaign |
+| <BillingMethod> | Billing method of the subscription being offered |
+| <DeliverySchedule> | Delivery schedule of the subscription being offered |
+| <DeliveryMethod> | Delivery method for the campaign being offered |
+^ XML Tag ^ Description |
+| <ComboID> | ID of the combo being offered, if applicable |
+| <CampaignRateList> | Contains a list of rates for each campaign offered |
+| <RateInfo> | Contains the details of a single rate |
+| <Term> | Term of the subscription being offered |
+| <Length> | Length of the subscription being offered |
+| <Amount> | Cost of the subscription being offered |
+Example XML:
+<Campaign>
+<code>
+    <CompletionStatus>
+       <Status>**Completed**</Status> 
+       <ErrorCode/>
+       <ErrorMessage/>
+    </CompletionStatus>
+    <CampaignList>
+       <Campaign>
+          <CampaignCode>**DMcomchg**</CampaignCode>
+          <ProductID>**DM**</ProductID>
+          <TransactionType>**ComboChange**</TransactionType>
+          <Script>**DM Delivery and Online**</Script>
+          <BillingMethod>**Office Pay**</BillingMethod>
+          <DeliverySchedule>**%%*%%**</DeliverySchedule>
+          <ComboID>**DM_ON**</ComboID>
+          <CampaignRateList>
+             <RateInfo>
+                <Term>**Week**</Term>
+                <Length>**4**</Length>
+                <Amount>**42.00**</Amount>
+             </RateInfo>
+          </CampaignRateList>
+       </Campaign>
+    </CampaignList>
+</code>
+</Campaign>
+=== Create a Subscription ===
+This process is used to create a new subscription using an existing campaign.
+Input Parameters:
+OccupantID
+**·  **
+AddressID
+**·  **
+^ ·   | CampaignID |
+^ ·   | User |
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals ByCampaign
+**·  **
+Optional Parameters:
+TranDate--If omitted, the next publishing date will be used
+**·  **
+RenewType--"Credit Card" or "Bank Draft" or "None"
+**·  **
+CreditCardNumber%%*%%--Must be masked if offsite authorization is used (defined in Business Rules)
+**·  **
+^ ·   | CreditCardType%%*%% |
+CreditCardExpires%%*%%
+**·  **
+CardHolderName%%*%%
+**·  **
+TokenID%%*%%--Can be sent only if offsite authorization is used (defined in Business Rules)
+**·  **
+^ ·   | BankType%%**%%--"Personal" or "Business" |
+AccountType%%**%%--"Checking" or "Savings"
+**·  **
+BankNumber%%**%%
+**·  **
+AccountNumber%%**%%--Bank account number
+**·  **
+^ ·   | BillPeriod (required if there is a renewal type) |
+TipAmount
+**·  **
+%%*%% Used only with credit card payments
+%%**%% Used only with bank draft payments
+Examples:
+For a campaign that creates a new start:
+HTTP://<server name>/cgi-bin/hm_hm.sh/interface/adplus/interface.p?
+occupantID=200&addressID=201&user=joelv&campaignID=newstart
+For a campaign that creates a credit card auto-renew start:
+HTTP://<server name>/cgi-bin/hm_hm.sh/interface/adplus/interface.p?
+occupantID=200&addressID=201&user=joelv&campaignID=newstart
+&RenewType=creditcard&creditcardnumber=4800000000000004
+&creditcardtype=visa&creditcardexpire=1113 
+XML Tags:
+^ XML Tag ^ Description |
+| <CreateSub> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <Subscription> | ID of the new subscription |
+Example XML:
+<CreateSub>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <Subscription>**199354**</Subscription> 
+</code>
+</CreateSub>
+=== Create a Billing Change ===
+This process is used to add a billing change using an existing campaign. 
+Input Parameters:
+SubscriptionID
+**·  **
+TranDate
+**·  **
+^ ·   | BillPeriod |
+^ ·   | CampaignID |
+RenewType--auto renew type ("Credit Card", "Bank Draft" or "None")
+**·  **
+User
+**·  **
+^ ·   | ActionType--always equals RunProg |
+^ ·   | ProgName--always equals ByCampaign |
+Optional Parameters:
+TipAmount
+**·  **
+^ ·   | CardHolderName%%*%% |
+CreditCardNumber%%*%%--Must be masked if offsite authorization is used (defined in Business Rules)
+**·  **
+CreditCardExpire%%*%%
+**·  **
+CreditCardAuthorizationNumber%%*%%
+**·  **
+^ ·   | CreditCardType%%*%% |
+TokenID%%*%%--Can be sent only if offsite authorization is used (defined in Business Rules)
+**·  **
+BankType%%**%%
+**·  **
+AccountType%%**%%
+**·  **
+^ ·   | BankNumber%%**%% |
+AccountNumber%%**%%
+**·  **
+%%*%% Used only with credit card auto renews
+%%**%% Used only with bank draft auto renews
+XML Tags:
+^ XML Tag ^ Description |
+| <BillChange> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+Example XML:
+<BillChange>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+</code>
+</BillChange>
+=== Create a Delivery Schedule Change ===
+This process is used to add a delivery schedule change using an existing campaign. 
+Input Parameters:
+User
+**·  **
+SubscriptionID
+**·  **
+^ ·   | TranDate |
+^ ·   | CampaignID |
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals ByCampaign
+**·  **
+Optional Parameters:
+GenerateTask
+**·  **
+XML Tags:
+^ XML Tag ^ Description |
+| <DeliverySchedule> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+Example XML:
+<DeliverySchedule>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+</code>
+</DeliverySchedule>
+=== Create a Payment (payment) ===
+This process (payment) is used to create a payment associated with a subscriber.
+^ Note | : When a campaign start is sent along with a payment, the reason code associated with the start  |
+must also be valid for payments. 
+Input Parameters:
+^ ·   | SubscriptionID |
+^ ·   | CampaignID |
+PaymentType--"Credit Card" or "Bank Draft"
+**·  **
+PaymentAmount
+**·  **
+^ ·   | TipAmount |
+^ ·   | TranDate |
+CreditCardNumber%%*%%--Must be valid PAN or Masked Card Number (%%************%%9999)
+**·  **
+CreditCardType%%*%%
+**·  **
+^ ·   | CreditCardExpire%%*%% |
+^ ·   | CVV2%%*%% |
+CardHolderName%%*%%
+**·  **
+TokenID (for use with offsite storage only)
+**·  **
+^ ·   | BankType%%**%% (personal, business) |
+^ ·   | AccountType%%**%% (savings, checking) |
+BankNumber%%**%% (router number of bank)
+**·  **
+AccountNumber%%**%% (actual account number)
+**·  **
+AuthorizationNumber--Payment authorization number
+**·  **
+^ ·   | TranID--Payment transaction ID |
+^ ·   | User (internal user name or name of application) |
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals payment
+**·  **
+%%*%% Used only with credit card payments
+%%**%% Used only with bank draft payments
+XML Tags:
+^ XML Tag ^ Description |
+| <Payment> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+Example XML:
+<Payment>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+</code>
+</Payment>
+=== Create a Task (task) ===
+This process (task) is used to create a task associated with a campaign. The campaign needs to be set 
+up to allow for task creation.
+Input Parameter:
+SubscriptionID
+**·  **
+^ ·   | CampaignID |
+TranDate
+**·  **
+User
+**·  **
+ActionType--always equals RunProg
+**·  **
+^ ·   | ProgName--always equals task |
+XML Tags:
+^ XML Tag ^ Description |
+| <CreateTask> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <TaskNumber> | Task number assigned by Circulation |
+Example XML:
+<CreateTask>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <TaskNumber>**4014**</TaskNumber>
+</code>
+</CreateTask>
+=== Create a Combo Change ===
+This process is used to add a combo change using an existing campaign. 
+Input Parameter:
+OriginalSubscriptionID
+**·  **
+TranDate
+**·  **
+^ ·   | CampaignID |
+^ ·   | RenewType--auto renew type ("Credit Card" or "Bank Draft" or "None") |
+BillPeriod
+**·  **
+TipAmount
+**·  **
+^ ·   | CreditCardNumber%%*%%--Must be valid PAN or Masked Card Number (%%************%%9999) |
+^ ·   | CreditCardType%%*%% |
+CreditCardExpire%%*%%
+**·  **
+CardHolderName%%*%%
+**·  **
+^ ·   | TokenID (for use with offsite storage only) |
+^ ·   | BankType%%**%% (personal, business) |
+AccountType%%**%% (savings, checking)
+**·  **
+BankNumber%%**%% (router number of bank)
+**·  **
+^ ·   | AccountNumber%%**%% (actual account number) |
+^ ·   | User |
+ActionType--always equals RunProg
+**·  **
+ProgName--always equals ByCampaign
+**·  **
+%%*%% Used only with credit card payments
+%%**%% Used only with bank draft payments
+XML Tags:
+^ XML Tag ^ Description |
+| <ComboChange> | Opening tag |
+| <CompletionStatus> | Contains the ReturnStatus and any errors |
+| <ReturnStatus> | "Completed" or "Error" |
+| <ErrorCode> | The numeric error code |
+| <ErrorMessage> | Description of the error  |
+| <Subscription> | ID of the combo's primary subscription |
+Example XML:
+<ComboChange>
+<code>
+    <CompletionStatus>
+       <ReturnStatus>**Completed**</ReturnStatus> 
+    </CompletionStatus>
+    <Subscription>**127147**</Subscription>
+</code>
+</ComboChange>
+=== Appendix--Error Codes ===
+^ Error Code ^ Description |
+| 600 | No subscription record found. |
+| 601 | No publication record found. |
+| 602 | No occupant record found. |
+| 603 | No address record found. |
+| 604 | No occupantphone record found. |
+| 605 | Subscription was not created. |
+| 606 | No campaign record found. |
+| 607 | Product address record already exists. |
+| 608 | Product address record already exists for the campaign/week. |
+| 609 | Unable to determine email address for target. |
+| 610 | No address information available, target not created. |
+| 611 | No publication or combo record found. |
+| 612 | No occupant created. |
+| 613 | No address created. |
+| 615 | No value passed for required field. |
+| 616 | Invalid value passed for parameter. |
+| 620 | Offsite is enabled. Offsite token ID is required. |
+| 621 | Offsite is enabled. Cannot accept real card data. |
+| 622 | Cannot vault and send unmasked card information. |
+| 623 | Cannot vault and send CVV2 information. |
+| 624 | Invalid CreditCardExpire format. |
+| 630 | No transaction available. |
+| 640 | No tasks created. |
+| 650 | No reasoncode record found. |
+| 651 | No sourcecode record found. |
+| 652 | No deliveryschedule record found. |
+| 660 | No rates Found. |
+| 661 | No terms Found. |
+| 699 | Addon not activated. |
+| 700 | No TargetAction records created. |
+| 701 | No TargetActionType records created. |
+^ Error Code ^ Description |
+| 702 | No DeliveryRequest records created. |
+| 800 | The subscriber's publication does not qualify for a combo-change. |
+| 801 | The subscriber is already a combo subscriber. |
+| 999 | Unknown error has occurred. |
