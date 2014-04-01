@@ -7,7 +7,7 @@ use matthewfleming\xml_to_html\Section;
 
 class Page
 {
-    const QUANTUM_NEW_SECTION = 31;
+    const QUANTUM_NEW_SECTION = 27;
     const QUANTUM_NEW_LINE = 2;
 
     /**
@@ -30,6 +30,18 @@ class Page
     public static function equals($val1, $val2, $quantum)
     {
         return (abs($val2 - $val1) <= $quantum);
+    }
+
+    public function ignore($node)
+    {
+        if (in_array($out, self::$IGNORE_LIST_MATCH)) {
+            return "";
+        }
+        foreach (self::$IGNORE_LIST_REGEX as $regex) {
+            if (preg_match($regex, $out)) {
+                return "";
+            }
+        }
     }
 
     public function createLines($nodes)
@@ -69,7 +81,6 @@ class Page
                 }
             }
             $line->sort();
-            //$line->dump();
             $lines[] = $line;
         }
         return $lines;
@@ -87,6 +98,7 @@ class Page
             $top = $element->getTop();
 
             $section = new Section();
+            $section->page = $this;
             $section->addLine($element);
 
             $i++;
@@ -98,10 +110,10 @@ class Page
                     $section->addLine($current);
                     $i++;
                 } else {
-                    $i++;
                     break;
                 }
             }
+            $section->getType();
             $sections[] = $section;
         }
         $this->sections = $sections;

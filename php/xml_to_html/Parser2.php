@@ -68,9 +68,9 @@ class Parser2
 
         foreach ($parser->pages as $pageNumber => $page) {
             foreach($page->sections as $index => $section) {
-                echo "\n---- Page " . $pageNumber . ' Section ' . $index . " ----\n";
+                echo "---- Page " . $pageNumber . ' Section ' . $index . ' Type ' . $section->type . " ----\n";
                 foreach ($section->lines as $line) {
-                    $line->toString();
+                    echo $line->toString();
                 }
             }
         }

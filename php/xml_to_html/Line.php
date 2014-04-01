@@ -42,37 +42,42 @@ class Line
 
     public function toString()
     {
+        $out = "";
         foreach ($this->elements as $element) {
-            echo $this->outputText($element);
+            $out .= $this->outputText($element, false, true);
         }
+        return $out . "\n";
     }
 
-    public function filter()
+    public function toText()
     {
-        $out = "";
-        if (in_array($out, self::$IGNORE_LIST_MATH)) {
-            return "";
+        $out = '';
+        foreach ($this->elements as $element) {
+            $out .= $this->innerText($element);
         }
-        foreach (self::$IGNORE_LIST_REGEX as $regex) {
-            if (preg_match($regex, $out)) {
-                return "";
-            }
-        }
+        return $out . "\n";
     }
 
-    public function outputText($node, $outputBold = true, $isChild = false)
-    {
-        $out = "";
+    public function innerXML($node) {
         if ($node->count()) {
             $xpath = $node->xpath('.');
             $xml = $xpath[0]->asXML();
 
             $innerXml = preg_replace('/<\/?text.*?>/', '', $xml);
 
-            $out .= html_entity_decode($innerXml);
-        } else {
-            $out = (string) $node;
+            return html_entity_decode($innerXml);
         }
+        return (string) $node;
+    }
+
+    public function innerText($node) {
+        $innerXml = $this->innerXML($node);
+        return preg_replace('/<\/?.*?>/', '', $innerXml);
+    }
+
+    public function outputText($node, $outputBold = true, $isChild = false)
+    {
+        $out = $this->innerXML($node);
         // Wiki escaping
         $out = preg_replace('/(\*+)/', '%%$1%%', $out);
         $bReplace = $outputBold ? '**' : '';
