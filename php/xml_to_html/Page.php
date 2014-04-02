@@ -123,7 +123,6 @@ class Page
                     break;
                 }
             }
-            $section->getType();
             $sections[] = $section;
         }
         $this->sections = $sections;

@@ -23,7 +23,7 @@ class Section
      *
      * @var int
      */
-    public $type;
+    private $type;
 
     /**
      *
@@ -43,10 +43,9 @@ class Section
     
     public function determineList() {
         $line = $this->lines[0];
-        
-        $text = $line->elements[0];
-        
-        if(preg_match('/^\s*\u{2202}\s*$/', $text)) {
+        $text = $line->elements[0]->innerText();
+
+        if(strpos($text, '·') !== false) {
             return true;
         }
         return false;  
@@ -57,11 +56,12 @@ class Section
     }
 
     public function getType() {
-        if ($this->type === null) {
+        if ($this->type === self::TYPE_UNDEFINED) {
             if($this->determineList()) {
                 $this->type = self::TYPE_LIST;
+            } else {
+                $this->type = self::TYPE_PARAGRAPH;
             }
-            $this->type = self::TYPE_PARAGRAPH;
         }
         return $this->type;
     }
