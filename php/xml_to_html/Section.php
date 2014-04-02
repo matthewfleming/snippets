@@ -46,7 +46,7 @@ class Section
         
         $text = $line->elements[0];
         
-        if(preg_match('/^\s*·\s*$/', $text)) {
+        if(preg_match('/^\s*\u{2202}\s*$/', $text)) {
             return true;
         }
         return false;  
