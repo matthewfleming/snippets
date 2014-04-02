@@ -50,7 +50,7 @@ class Parser2
 
         foreach ($parser->pages as $pageNumber => $page) {
             foreach($page->sections as $index => $section) {
-                echo "---- Page " . $pageNumber . ' Section ' . $index . ' Type ' . $section->getType() . " ----\n";
+                echo "---- Page " . $pageNumber . ' Section ' . $index . ' Type ' . $section->getTypeString() . " ----\n";
                 foreach ($section->lines as $line) {
                     echo $line->toString();
                 }
