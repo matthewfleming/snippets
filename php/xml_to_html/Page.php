@@ -10,12 +10,19 @@ class Page
     const QUANTUM_NEW_SECTION = 27;
     const QUANTUM_NEW_LINE = 2;
 
+    public static $IGNORE_LIST_MATCH = array(
+        "Preliminary Copy"
+    );
+    public static $IGNORE_LIST_REGEX = array(
+        "/^\s*REV ..\/..\/../"
+    );
+
     /**
      *
      * @var Section[]
      */
     public $sections;
-    
+
     public function __construct($elements)
     {
         $lines = $this->createLines($elements);
@@ -32,16 +39,17 @@ class Page
         return (abs($val2 - $val1) <= $quantum);
     }
 
-    public function ignore($node)
+    private function skip($element)
     {
-        if (in_array($out, self::$IGNORE_LIST_MATCH)) {
-            return "";
+        if (in_array($element->innerText(), self::$IGNORE_LIST_MATCH)) {
+            return true;
         }
         foreach (self::$IGNORE_LIST_REGEX as $regex) {
-            if (preg_match($regex, $out)) {
-                return "";
+            if (preg_match($regex, $element->innerText())) {
+                return true;
             }
         }
+        return false;
     }
 
     public function createLines($nodes)
@@ -61,18 +69,24 @@ class Page
         $end = count($nodes) - 1;
 
         while ($i <= $end) {
-            $element = $nodes[$i];
-            $attributes = $element->attributes();
-            $top = (int) $attributes['top'];
+            $element = new Element($nodes[$i]);
+            if($this->skip($element)) {
+                $i++;
+                continue;
+            }
+            $top = $element->top;
 
             $line = new Line();
             $line->addElement($element);
 
             $i++;
             while ($i < $end) {
-                $current = $nodes[$i];
-                $currentAttributes = $current->attributes();
-                $currentTop = (int) $currentAttributes['top'];
+                $current = new Element($nodes[$i]);
+                if($this->skip($current)) {
+                    $i++;
+                    continue;
+                }
+                $currentTop = $current->top;
                 if (self::equals($top, $currentTop, self::QUANTUM_NEW_LINE)) {
                     $line->addElement($current);
                     $i++;

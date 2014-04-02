@@ -30,11 +30,11 @@ class Line
 
     /**
      *
-     * @param \SimpleXMLElement $element
+     * @param Element
      */
-    public function addElement($element)
+    public function addElement(Element $element)
     {
-        $this->elements[] = new Element($element);
+        $this->elements[] = $element;
     }
 
     public function getTop()

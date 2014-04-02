@@ -9,13 +9,11 @@ class Parser2
     const INPUT_FILE_NAME = 'input.xml';
     const OUTPUT_FILE_NAME = 'output.wiki';
 
-
     /**
      *
      * @var \SimpleXMLElement
      */
     public $xml;
-
 
     /**
      *
