@@ -3,6 +3,22 @@
 
 <pdf2xml>
 <page number="36" position="absolute" top="0" left="0" height="1188" width="918">
+	<fontspec id="0" size="27" family="Times" color="#ffffff"/>
+	<fontspec id="1" size="9" family="Times" color="#000000"/>
+	<fontspec id="2" size="52" family="Times" color="#000000"/>
+	<fontspec id="3" size="43" family="Times" color="#7f7f7f"/>
+	<fontspec id="4" size="10" family="Times" color="#000000"/>
+	<fontspec id="5" size="27" family="Times" color="#000000"/>
+	<fontspec id="6" size="11" family="Times" color="#000000"/>
+	<fontspec id="7" size="9" family="Times" color="#000000"/>
+	<fontspec id="8" size="17" family="Times" color="#000000"/>
+	<fontspec id="9" size="14" family="Times" color="#000000"/>
+	<fontspec id="10" size="14" family="Times" color="#000000"/>
+	<fontspec id="11" size="13" family="Times" color="#000000"/>
+	<fontspec id="12" size="12" family="Times" color="#000000"/>
+	<fontspec id="13" size="12" family="Times" color="#000000"/>
+	<fontspec id="14" size="10" family="Times" color="#000000"/>
+	<fontspec id="15" size="10" family="Times" color="#000000"/>
 <text top="81" left="812" width="15" height="12" font="1">36</text>
 <text top="81" left="724" width="80" height="12" font="1">CIRCULATION API</text>
 <text top="97" left="687" width="117" height="11" font="7"><b> Create a Combo Change</b></text>

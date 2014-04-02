@@ -8,46 +8,28 @@ class Parser2
 {
     const INPUT_FILE_NAME = 'input.xml';
     const OUTPUT_FILE_NAME = 'output.wiki';
-    const HEADING_MAX_LEVEL = 5;
-    const HEADING_SIZE_H2 = 40;
-    const HEADING_SIZE_H3 = 20;
-    const HEADING_SIZE_H4 = 15;
-    const HEADING_SIZE_H5 = 15;
+
 
     /**
      *
      * @var \SimpleXMLElement
      */
     public $xml;
-    public $fonts;
-    public $lines;
-    public $sections;
+
+
+    /**
+     *
+     * @var Page
+     */
+    public $pages;
 
     public function parseFonts()
     {
         $fontspecs = $this->xml->xpath('//fontspec');
 
-        $fonts = array();
-
         foreach ($fontspecs as $fontspec) {
-            $attributes = $fontspec->attributes();
-            $size = (int) $attributes['size'];
-
-            if ($size >= self::HEADING_SIZE_H2) {
-                $level = 2;
-            } else if ($size >= self::HEADING_SIZE_H3) {
-                $level = 3;
-            } else if ($size >= self::HEADING_SIZE_H4) {
-                $level = 4;
-            } else if ($size >= self::HEADING_SIZE_H5) {
-                $level = 5;
-            } else {
-                $level = 0;
-            }
-            $fonts[(int) $attributes['id']] = $level;
+            Font::addFont($fontspec);
         }
-
-        $this->fonts = $fonts;
     }
 
     public function createPages()

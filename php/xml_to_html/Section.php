@@ -52,6 +52,10 @@ class Section
         return false;  
     }
 
+    public function setType($type) {
+        $this->type = $type;
+    }
+
     public function getType() {
         if ($this->type === null) {
             if($this->determineList()) {

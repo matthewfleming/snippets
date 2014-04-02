@@ -4,23 +4,43 @@ namespace matthewfleming\xml_to_html;
 
 class Line
 {
+    const TYPE_UNDEFINED = 0;
+    const TYPE_PARAGRAPH = 1;
+    const TYPE_HEADING = 2;
+
     /**
      *
-     * @var \SimpleXMLElement[]
+     * @var Element[]
      */
     public $elements = array();
     private $top = null;
 
+    /**
+     *
+     * @return boolean
+     */
+    public function isHeading() {
+        foreach($this->elements as $element) {
+            if ($element->isHeading()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @param \SimpleXMLElement $element
+     */
     public function addElement($element)
     {
-        $this->elements[] = $element;
+        $this->elements[] = new Element($element);
     }
 
     public function getTop()
     {
         if (!$this->top) {
-            $attributes = $this->elements[0]->attributes();
-            $this->top = (int) $attributes['top'];
+            $this->top = $this->elements[0]->top;
         }
         return $this->top;
     }
@@ -28,16 +48,8 @@ class Line
     public function sort()
     {
         usort($this->elements, function($a, $b) {
-            $attributesA = $a->attributes();
-            $attributesB = $b->attributes();
-            return $attributesA['left'] - $attributesB['left'];
+            return $a->left - $b->left;
         });
-    }
-
-    public function dump() {
-        foreach($this->elements as $element) {
-            echo var_dump($element);
-        }
     }
 
     public function toString()
@@ -53,31 +65,14 @@ class Line
     {
         $out = '';
         foreach ($this->elements as $element) {
-            $out .= $this->innerText($element);
+            $out .= $element->innerText();
         }
         return $out . "\n";
     }
 
-    public function innerXML($node) {
-        if ($node->count()) {
-            $xpath = $node->xpath('.');
-            $xml = $xpath[0]->asXML();
-
-            $innerXml = preg_replace('/<\/?text.*?>/', '', $xml);
-
-            return html_entity_decode($innerXml);
-        }
-        return (string) $node;
-    }
-
-    public function innerText($node) {
-        $innerXml = $this->innerXML($node);
-        return preg_replace('/<\/?.*?>/', '', $innerXml);
-    }
-
     public function outputText($node, $outputBold = true, $isChild = false)
     {
-        $out = $this->innerXML($node);
+        $out = $node->innerXml;
         // Wiki escaping
         $out = preg_replace('/(\*+)/', '%%$1%%', $out);
         $bReplace = $outputBold ? '**' : '';

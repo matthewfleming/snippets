@@ -15,7 +15,7 @@ class Page
      * @var Section[]
      */
     public $sections;
-
+    
     public function __construct($elements)
     {
         $lines = $this->createLines($elements);
@@ -86,6 +86,10 @@ class Page
         return $lines;
     }
 
+    /**
+     *
+     * @param Lines[] $lines
+     */
     public function createSections($lines)
     {
         $sections = array();
@@ -94,14 +98,20 @@ class Page
         $end = count($lines);
 
         while ($i < $end) {
-            $element = $lines[$i];
-            $top = $element->getTop();
+            $line = $lines[$i];
+            $i++;
+            $top = $line->getTop();
 
             $section = new Section();
             $section->page = $this;
-            $section->addLine($element);
+            $section->addLine($line);
 
-            $i++;
+            if ($line->isHeading()) {
+                $section->setType(Section::TYPE_HEADING);
+                $sections[] = $section;
+                continue;
+            }
+
             while ($i < $end) {
                 $current = $lines[$i];
                 $currentTop = $current->getTop();
