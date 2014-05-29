@@ -1,0 +1,7 @@
+/app/cache/
+/.git/
+/import/
+/export/
+*/logs/
+*/cache/
+/app/config/parameters.yml
