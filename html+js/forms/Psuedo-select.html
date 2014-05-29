@@ -1,0 +1,140 @@
+<html>
+<head>
+	<style>
+		input, .selection {
+			border: 1px solid #000;
+			background: #ebebeb;
+			font: 12px arial;
+			padding: 5px;			
+		}
+		.selectionWrapper {
+			float: left;
+			width: 200px;
+		}
+		.selection {
+			text-decoration: none;
+			color: #000;
+			display: block;
+		}
+		.selectionWrapper .caret {
+			font-size: 0.8em;
+			float: right;
+		}
+		.options {
+			display: none;
+			border: 1px solid #000;
+			background: #ebebeb;
+			overflow: hidden;
+			
+		}
+		.options a {
+			font: 12px arial;
+			display: block;
+			color: #000;
+			text-decoration: none;
+			padding: 5px 5px;
+			margin: 0 -1px;
+		}
+		.options .contents {
+		}
+		
+	</style>
+	<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+
+<body>
+	<form>
+		<div>
+			<input>
+		</div>
+		<div class="selectionWrapper">
+			<a href="#" class="selection"><span class="contents">Select me</span><span class="caret"> &nbsp;&#9660;</span></a>
+			<div class="options">
+				<a href="#" tabindex="-1"><span class="contents">Select me</span></a>
+				<a href="#" tabindex="-1"><span class="contents">Option1</span></a>
+				<a href="#" tabindex="-1"><span class="contents">Option2</span></a>
+				<a href="#" tabindex="-1"><span class="contents">Option3</span></a>
+			</div>
+		</div>
+		<div>
+			<select>
+				<option>1</option>
+				<option>2</option>
+			</select>
+		</div>
+	</form>
+	
+	<script>
+		$(function() {
+			var $selection = $('.selection');
+			var $optionContents = $('.options .contents');
+			
+			/*
+			var maxWidth = 0;
+			for(var i in $optionContents) {
+				var width = $($optionContents[i]).innerWidth();
+				if (width > maxWidth) {
+					maxWidth = width;
+				}
+			}
+			$('.selection .contents').width(maxWidth);			
+			*/
+			$selection.click(function(e) {
+				e.preventDefault();
+				$this = $(this);
+				$this.focus();
+				$('.options').show();
+			});
+			$selection.keydown(function(e) {
+				switch(e.which) {
+					case 9: //tab
+						break;	
+					case 13: //enter
+						break;					
+					case 37: //left
+						break;
+					case 38: //up
+						break;
+					case 39: //right
+						break;
+					case 40: //down
+						var options = $('.options');
+						options.show();
+						options.find(':first-child').focus();
+						break;
+					default:
+				}
+				this.selection = e.which;
+				$(this).data('selection', e.which);
+			});
+			$('.options a').keydown(function(e) {
+				switch(e.which) {
+					case 13: //enter
+						e.preventDefault();
+					case 9: //tab
+						var $selection = $('.selection');
+						$selection.children('.contents').html($(this).children('.contents').html());
+						$selection.focus();
+						$('.options').hide();
+						break;					
+					case 37: //left
+						break;
+					case 38: //up
+						if(!$(this).is(':first-child')) {
+							$(this).prev().focus();
+						}
+						break;
+					case 39: //right
+						break;
+					case 40: //down
+						if(!$(this).is(':last-child')) {
+							$(this).next().focus();
+						}
+						break;
+					default:
+				}
+			});		
+			
+		});
+	</script>
+</body>
