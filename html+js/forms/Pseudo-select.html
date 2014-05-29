@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pseudo-select</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+        body {
+            margin: 0 auto;
+            width: 1000px;
+        }
+        input, select, .selection, label {
+            font: 12px/16px arial;
+            padding: 6px 0;
+        }
+        input, select, .selection, label
+        {
+            color: #222;
+        }
+		input, select, .selection {
+			border: 1px solid #000;
+			background: #ebebeb;
+			padding: 5px;
+            margin: 0;
+        }
+        input:focus, select:focus, .selection:focus, .options a:hover,.options a:focus  {
+            outline: 0;
+            border-color: #428bca;
+            border-color: rgba(82,168,236,.6);
+            box-shadow: 0 0 8px rgba(82,168,236,.6);
+        }
+        input, select, .selection, .options .border, .options a {
+            border-radius: 4px;
+		}
+		.selectionWrapper {
+			float: left;
+			width: 200px;
+            position: relative;
+		}
+		.selection {
+			text-decoration: none!important;
+			color: #000!important;
+			display: block;
+		}
+		.selectionWrapper .caret {
+			margin-top: 6px;
+            float: right;
+		}
+		.options {
+			display: none;
+			background: #ebebeb;
+            position: absolute;
+            top: 27px;
+            width: 100%;
+            z-index: 10;
+        }
+        .options .border {
+            border: 1px solid #000;
+		}
+		.options a {
+			font: 12px arial;
+			display: block;
+			color: #000;
+			text-decoration: none!important;
+			padding: 5px 5px;
+            border: 1px solid transparent;
+		}
+        
+        .options a:hover,.options a:focus  {
+            background-color: #428bca;
+            background-color: rgba(82,168,236,.6);
+        }
+		
+	</style>
+	<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+
+<body>
+	<form class="form-horizontal">
+        <h1>Pseudo-select Demo</h1>
+		<div class="form-group">
+            <label class="col-sm-2 control-label">input</label>
+            <div class="col-sm-10">
+                <input>
+            </div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">pseudo-select</label>
+            <div class="col-sm-10">
+                <div class="selectionWrapper">
+                    <a href="#" class="selection"><span class="contents">Select me</span><span class="caret"></span></a>
+                    <div class="options">
+                        <div class="border">
+                            <a href="#" tabindex="-1"><span class="contents">Select me</span></a>
+                            <a href="#" tabindex="-1"><span class="contents">Option1</span></a>
+                            <a href="#" tabindex="-1"><span class="contents">Option2</span></a>
+                            <a href="#" tabindex="-1"><span class="contents">Option3</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<div class="form-group">
+            <label class="col-sm-2 control-label">select</label>
+            <div class="col-sm-10">
+                <select>
+                    <option>Select me</option>
+                    <option>Option1</option>
+                    <option>Option2</option>
+                    <option>Option3</option>
+                </select>
+            </div>
+		</div>
+	</form>
+	
+	<script>
+		$(function() {
+			var $selection = $('.selection');
+			var $optionContents = $('.options .contents');
+			
+			/*
+			var maxWidth = 0;
+			for(var i in $optionContents) {
+				var width = $($optionContents[i]).innerWidth();
+				if (width > maxWidth) {
+					maxWidth = width;
+				}
+			}
+			$('.selection .contents').width(maxWidth);			
+			*/
+			$selection.click(function(e) {
+				e.preventDefault();
+				$this = $(this);
+				$this.focus();
+				$('.options').show();
+			});
+			$selection.keydown(function(e) {
+				switch(e.which) {
+					case 9: //tab
+						break;	
+					case 13: //enter
+						break;					
+					case 37: //left
+						break;
+					case 38: //up
+						break;
+					case 39: //right
+						break;
+					case 40: //down
+						var options = $('.options');
+						options.show();
+						options.find(':first-child').focus();
+						break;
+					default:
+				}
+				this.selection = e.which;
+				$(this).data('selection', e.which);
+			});
+			$('.options a').keydown(function(e) {
+                var $this = $(this);
+				switch(e.which) {
+					case 13: //enter
+						e.preventDefault();
+					case 9: //tab
+						var $selection = $('.selection');
+						$selection.children('.contents').html($this.children('.contents').html());
+						$selection.focus();
+						$('.options').hide();
+						break;					
+					case 37: //left
+						break;
+					case 38: //up
+						if(!$this.is(':first-child')) {
+							$this.prev().focus();
+						}
+						break;
+					case 39: //right
+						break;
+					case 40: //down
+						if(!$this.is(':last-child')) {
+							$this.next().focus();
+						}
+						break;
+					default:
+				}
+			});		
+			
+		});
+	</script>
+</body>
