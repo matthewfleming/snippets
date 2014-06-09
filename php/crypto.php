@@ -1,5 +1,15 @@
 <?php
 
+function base64url_encode($data)
+{
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+function base64url_decode($data)
+{
+    return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+}
+
 /**
  * Return hex encoded random bytes. The dictionary is /[0-9a-f]/.
  * Encoded data is 100% larger than bytes encoded. Entropy = 4*$length bits.
@@ -21,12 +31,13 @@ function psuedo_random_hex_bytes($length)
 function psuedo_random_urlsafe($length)
 {
     $adjustedLength = ceil($length / 1.33);
-    $base64 = base64_encode(openssl_random_pseudo_bytes($adjustedLength));
-    $urlSafe = str_replace(array('+', '/'), array('-', '_'), $base64);
+    $bytes = openssl_random_pseudo_bytes($adjustedLength);
+    $urlSafe = base64url_encode($bytes);
     return substr($urlSafe, 0, $length);
 }
 
-function generate_keypair($digestAlgorithm = "sha512", $bits = 4096, $keyType = OPENSSL_KEYTYPE_RSA) {
+function generate_keypair($digestAlgorithm = "sha512", $bits = 4096, $keyType = OPENSSL_KEYTYPE_RSA)
+{
     $config = array(
         "digest_alg" => $digestAlgorithm,
         "private_key_bits" => $bits,
@@ -63,8 +74,8 @@ function make_certificate()
 
     // Create a self-signed certificate
     $dn = array(
-        "countryName"            => "AU",
-        "stateOrProvinceName"    => "WA",
+        "countryName" => "AU",
+        "stateOrProvinceName" => "WA",
         "localityName" => "Perth",
         "organizationName" => "The West Australian",
         "organizationalUnitName" => "Circulation Department",
@@ -72,31 +83,34 @@ function make_certificate()
         "emailAddress" => "matthew.fleming@wanews.com.au"
     );
 
-    $csr  = openssl_csr_new ($dn, $keyPairResource);
-    
+    $csr = openssl_csr_new($dn, $keyPairResource);
+
     $cert = openssl_csr_sign($csr, null, $privateKey, 3652);
-    
+
     openssl_x509_export($cert, $certout);
-    echo $certout;
-    exit;
 
     // Extract the public key from $res to $pubKey
-    $pubKeyDetails = openssl_pkey_get_details($res);
+    $pubKeyDetails = openssl_pkey_get_details($keyPairResource);
     $pubKey = $pubKeyDetails["key"];
 
-    $data = 'plaintext data goes here';
-
+    $data = psuedo_random_hex_bytes(4096/8-200);
     // Encrypt the data to $encrypted using the public key
     openssl_public_encrypt($data, $encrypted, $pubKey);
+
+    $encrypted = (hex2bin(bin2hex($encrypted)));
 
     // Decrypt the data using the private key and store the results in $decrypted
     openssl_private_decrypt($encrypted, $decrypted, $privateKey);
 
-    echo $decrypted;
+    echo "---data--\n" . $data;
+    echo "\n---encrypted--\n" . bin2hex($encrypted);
+    echo "\n---decrypted--\n" . $decrypted;
 }
 
 //echo psuedo_random_urlsafe(70);
+//var_dump(generate_keypair());
+//exit;
+//generate_keypair();
 
-var_dump(generate_keypair());
-exit;
-generate_keypair();
+make_certificate();
+
