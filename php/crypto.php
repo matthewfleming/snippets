@@ -107,10 +107,47 @@ function make_certificate()
     echo "\n---decrypted--\n" . $decrypted;
 }
 
+/**
+ *
+ * @param type $key
+ * @param type $string
+ * @return string Base
+ */
+function encrypt($key, $string) {
+    return base64url_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($key), $string, MCRYPT_MODE_CBC, md5(md5($key))));
+}
+
+function decrypt($key, $string) {
+    return rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key), base64url_decode($string), MCRYPT_MODE_CBC, md5(md5($key))), "\0");
+}
+
+function encryption_info() {
+    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+    $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+
+    echo $iv_size,"\n",$iv,"\n",md5($iv);
+}
+
+function demo_encode() {
+    $key = 'f69I5cJKrhXXhgUTOBog';
+    $string = 'string to be encrypted';
+
+    $encrypted = encrypt($key,$string);
+    $decrypted = decrypt($key,$encrypted);
+
+    echo 'Unencrypted: ', $string, "\n";
+    echo 'Encrypted:   ', $encrypted, "\n";
+    echo 'Decrypted:   ', $decrypted, "\n";
+}
+
+
 //echo psuedo_random_urlsafe(70);
 //var_dump(generate_keypair());
 //exit;
 //generate_keypair();
 
-make_certificate();
+//make_certificate();
+
+demo_encode();
+encryption_info();
 
