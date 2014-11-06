@@ -1,0 +1,6 @@
+# Rewrite any uppercase urls to lowercase
+# The negative condition is to allow uppercases in filenames
+RewriteMap tolower int:tolower
+RewriteCond %{REQUEST_URI} [A-Z]
+RewriteCond %{REQUEST_URI} ![\w]+\.[\w]+$
+RewriteRule .* ${tolower:%{REQUEST_URI}} [R=301,L]

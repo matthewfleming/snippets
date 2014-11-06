@@ -1,0 +1,15 @@
+Remove blank and empty lines
+Search:		\s{4,}
+Replace:	\r\n
+
+Remove bad three/four letter words
+Search: ^(?=(cum|pee|tit|fag|fap|anus|arse|clit|cock|coon|cunt|dago|damn|dick|dike|dyke|fuck|gook|heeb|hell|homo|jizz|kike|kunt|kyke|mick|muff|paki|piss|poon|puto|shit|shiz|slut|smeg|spic|tard|tits|twat|wank|slag)).*$
+
+Match CSV contents
+"?([^"\n]*)"?,
+
+Match CSV line into 3 groups 
+^"?([^"\n]*)"?,"?([^"\n]*)"?,"?([^"\n]*)"?$
+
+Match CSV line into 6 groups 
+^"?([^"\n]*)"?,"?([^"\n]*)"?,"?([^"\n]*)"?,"?([^"\n]*)"?,"?([^"\n]*)"?,"?([^"\n]*)"?$

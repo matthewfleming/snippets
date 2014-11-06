@@ -22,6 +22,17 @@ function psuedo_random_hex_bytes($length)
 }
 
 /**
+ * Generate a 32bit integer between $min and $max
+ * @param int $min
+ * @param int $max
+ */
+function psuedo_random_number($min, $max) {
+    $bytes = openssl_random_pseudo_bytes(4);
+    $int = unpack('l', $bytes);
+    return $min + abs($int[1] % ($max-$min+1));
+}
+
+/**
  * Return URL safe random bytes using standard 'base64url' encoding with URL and Filename Safe Alphabet (RFC 4648).
  * The dictionary is /[0-9A-Za-z_\-]/.
  * Encoded data is 33% larger than bytes encoded. Entropy = 6*$length bits.
@@ -148,6 +159,12 @@ function demo_encode() {
 
 //make_certificate();
 
-demo_encode();
-encryption_info();
+//demo_encode();
+//encryption_info();
 
+//echo psuedo_random_hex_bytes(32);
+
+for($i=0;$i<100; $i++) {
+    echo psuedo_random_number(100, 999) . "\n";
+
+}

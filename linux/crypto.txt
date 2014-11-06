@@ -1,0 +1,6 @@
+OPENSSL/TAR
+Archive & Encrypt
+tar -cz export_folder | openssl aes-256-cbc -out export.tgz.enc -pass file:key.txt
+
+Decrypt & Extract:
+openssl aes-256-cbc -d -in export.tgz.enc -pass file:key.txt | tar –xz
