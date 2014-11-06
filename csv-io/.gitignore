@@ -1,0 +1,34 @@
+# Config
+config/parameters.yml
+
+# Composer
+composer.phar
+composer.lock
+
+# Library directories
+vendor/*
+*/logs/*
+*/cache/*
+
+# IDE files
+*.sw[op]
+/nbproject/
+.idea/
+.project
+.settings
+
+# Ant files
+cache.properties
+build/
+
+# OS X
+._*
+.DS_Store
+.Trashes
+
+# SASS
+.sass-cache/
+
+#backup files
+*.php~
+
