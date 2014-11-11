@@ -1,6 +1,9 @@
 # config settings
-database:
-    circdemo:
+default:    
+    connection: connection1
+connection:
+    connection1:
+        type:   'doctrine'
         driver: 'pdo_mysql'
         host:   'host'
         port:   3306

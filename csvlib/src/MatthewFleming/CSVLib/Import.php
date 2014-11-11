@@ -1,46 +1,19 @@
 <?php
 
-require_once './vendor/autoload.php';
+namespace MatthewFleming\CSVLib;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
 use Symfony\Component\Yaml\Yaml;
+use Ulrichsg\Getopt\Getopt;
+use Ulrichsg\Getopt\Option;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-class Database
-{
-    private static $conn = array();
-
-    /**
-     *
-     * @return Connection
-     */
-    public static function getConnecion($name)
-    {
-        if (empty(self::$conn[$name])) {
-            $params = Yaml::parse('config/parameters.yml');
-            $cp = $params['database'][$name];
-            $connectionParams = array(
-                'user' => $cp['user'],
-                'password' => $cp['pass'],
-                'host' => $cp['host'],
-                'port' => $cp['port'],
-                'driver' => $cp['driver']
-            );
-            if (!empty($cp['db'])) {
-                $connectionParams['dbname'] = $cp['db'];
-            }
-            self::$conn[$name] = \Doctrine\DBAL\DriverManager::getConnection($connectionParams);
-        }
-        return self::$conn[$name];
-    }
-
-}
 
 class Import
 {
@@ -49,6 +22,18 @@ class Import
      * @var Connection
      */
     private $conn;
+
+    /**
+     *
+     * @var Getopt
+     */
+    private $options;
+
+    /**
+     *
+     * @var array
+     */
+    private $params;
 
     /**
      *
@@ -79,17 +64,57 @@ class Import
         return(empty($invalid));
     }
 
-    public function __construct($connectionName)
+    public function __construct($connectionName, $options, $params)
     {
         $this->conn = Database::getConnecion($connectionName);
+        $this->options = $options;
+        $this->params = $params;
+    }
+
+    private static function parseOptions()
+    {
+        $getopt = new Getopt(array(
+            new Option('c', 'connection', Getopt::REQUIRED_ARGUMENT, 'Name of connection defined in parameters.yml'),
+            new Option('h', 'help', Getopt::NO_ARGUMENT, 'Display help text')
+        ));
+        $getopt->setBanner("Usage: %s [options] table-name file-name\n");
+        $getopt->parse();
+        return $getopt;
+    }
+
+    private static function stop($options, $message = null)
+    {
+        if ($message) {
+            echo "Error: $message\n";
+        }
+        echo $options->getHelpText();
+        exit(1);
     }
 
     public static function run()
     {
-        $import = new \Import('circdemo');
+        $params = Yaml::parse('config/parameters.yml');
+        
+        $options = self::parseOptions();
+        if ($options['h']) {
+            $this->exit();
+        }
+        if ($options['c']) {
+            $conn = $options['c'];
+        } else if (isset($params['default']['connection'])) {
+            $conn = $params['default']['connection'];
+        } else {
+            self::stop($options, 'No connection specified and no default connection in parameters.');
+        }
 
-        //$import->import('EasyPayTransition', '../../SubscriberTable.csv');
-        $import->import('EasyPayTransitionSubscription', '../../SubscriptionTable.csv');
+        $import = new Import($conn, $options, $params);
+        $tableName = $options->getOperand(0);
+        $fileName = $options->getOperand(1);
+        
+        if(!$tableName || !$fileName) {
+            self::stop($options, 'Required operands table-name & file-name not provided');
+        }
+        $import->import($tableName, $fileName);
     }
 
     private function handleBlanks($table, $columnName, $value)
@@ -98,7 +123,7 @@ class Import
         if ($trimmed === '0') {
             return '0';
         }
-        if (strcasecmp('null',$trimmed) === 0) {
+        if (strcasecmp('null', $trimmed) === 0) {
             return null;
         }
         if ($trimmed === '') {
@@ -140,6 +165,10 @@ class Import
         $rows = 0;
         $line = fgets($inputHandle);
         while ($line !== FALSE) {
+            if(preg_match('/^[\s,]*$/', $line)) {
+                $line = fgets($inputHandle);
+                continue;
+            }
             $values = str_getcsv($line);
             $trimmed = array_map('trim', $values);
             $i = 0;
@@ -164,7 +193,7 @@ class Import
         }
         fclose($inputHandle);
 
-        echo "Rows affected: $rows";
+        echo "Rows affected: $rows\n";
         if (!empty($this->errors)) {
             echo "Errors:\n";
             $i = 0;
@@ -175,7 +204,3 @@ class Import
     }
 
 }
-
-//Sync::run();
-//Updater::update();
-Import::run();
