@@ -129,7 +129,7 @@ class Update
             self::stop($options, "You must choose columns to appear in the WHERE clause\n"
                 . "e.g. -w 1,3 to use columns 1 and 3");
         }
-        $update->update($tableName, $fileName, $whereColumns);
+        return $update->update($tableName, $fileName, $whereColumns);
     }
 
     private function handleBlanks($table, $columnName, $value)
@@ -154,7 +154,7 @@ class Update
         $dryRun = ($this->options['f'] < 1);
         $inputHandle = fopen($filename, "r");
         if (!$inputHandle) {
-            throw new \Exception('Filename: "' . basename($filename) . '" does not exist in ' . realpath(dirname($filename)));
+            throw new \Exception('Unable to open filename: "' . basename($filename) . '" in ' . realpath(dirname($filename)));
         }
         $columnNames = fgetcsv($inputHandle);
         $invalid = null;
@@ -245,8 +245,8 @@ class Update
             }
             if($dryRun) {
                 echo "-----------------------------------------------\nGenerated query (add -f to force):\n-----------------------------------------------\n",
-                    $sql,";\n-----------------------------------------------";
-                exit;
+                    $sql,";\n-----------------------------------------------\n";
+                return 0;
             }
             try {
                 $query->execute();
@@ -274,6 +274,8 @@ class Update
                 echo $line, ": $error\n";
             }
         }
+
+        return 0;
     }
 
 }
