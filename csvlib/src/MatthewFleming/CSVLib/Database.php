@@ -16,11 +16,12 @@ class Database
     public static function getConnecion($name)
     {
         if (empty(self::$conn[$name])) {
-            $params = Yaml::parse('config/parameters.yml');
+            global $appBase;
+            $params = Yaml::parse($appBase . '/config/parameters.yml');
             $cp = $params['connection'][$name];
             switch ($cp['type']) {
                 case 'doctrine':
-                    self::connectDoctrine($name,$cp);
+                    self::connectDoctrine($name, $cp);
                     break;
                 default:
                     throw new \Exception('Invalid connection type');
@@ -28,7 +29,7 @@ class Database
         }
         return self::$conn[$name];
     }
-    
+
     private static function connectDoctrine($name, $cp)
     {
         $connectionParams = array(

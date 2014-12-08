@@ -14,7 +14,7 @@ use Ulrichsg\Getopt\Option;
  * and open the template in the editor.
  */
 
-class Import
+class Update
 {
     /**
      *
@@ -79,6 +79,8 @@ class Import
     {
         $getopt = new Getopt(array(
             new Option('c', 'connection', Getopt::REQUIRED_ARGUMENT, 'Name of connection defined in parameters.yml'),
+            new Option('f', 'force', Getopt::NO_ARGUMENT, 'Force - Run update on database, dry-run otherwise'),
+            new Option('w', 'where', Getopt::REQUIRED_ARGUMENT, 'List of columns to refer to in WHERE clause comma separated, indexed from 1'),
             new Option('h', 'help', Getopt::NO_ARGUMENT, 'Display help text')
         ));
         $getopt->setBanner("Usage: %s [options] table-name file-name\n");
@@ -112,14 +114,15 @@ class Import
             self::stop($options, 'No connection specified and no default connection in parameters.');
         }
 
-        $import = new Import($conn, $options, $params);
+        $update = new Update($conn, $options, $params);
         $tableName = $options->getOperand(0);
         $fileName = $options->getOperand(1);
+        $whereColumns = $options['w'];
 
         if (!$tableName || !$fileName) {
             self::stop($options, 'Required operands table-name & file-name not provided');
         }
-        $import->import($tableName, $fileName);
+        $update->update($tableName, $fileName, $whereColumns);
     }
 
     private function handleBlanks($table, $columnName, $value)
@@ -139,8 +142,9 @@ class Import
         return $trimmed;
     }
 
-    private function import($tableName, $filename)
+    private function update($tableName, $filename, $whereColumnList)
     {
+        $dryRun = ($this->options['f'] < 1);
         $inputHandle = fopen($filename, "r");
         if (!$inputHandle) {
             throw new \Exception('Filename: "' . basename($filename) . '" does not exist in ' . realpath(dirname($filename)));
@@ -159,6 +163,19 @@ class Import
             throw new \Exception($msg);
         }
 
+        $whereColumnIndexes = explode(',', $whereColumnList);
+        foreach ($whereColumnIndexes as $key => $value) {
+            $whereColumnIndexes[$key] = $value - 1;
+        }
+        //TODO validate indexes as numbers, length > 1
+
+        $whereColumnNames = array();
+        foreach ($whereColumnIndexes as $columnIndex) {
+            $whereColumnNames[$columnIndex] = $columnNames[$columnIndex];
+            unset($columnNames[$columnIndex]);
+        }
+        $columnIndexes = array_keys($columnNames);
+
         $setClause = '';
         foreach ($columnNames as $column) {
             if (empty($setClause)) {
@@ -168,13 +185,23 @@ class Import
             }
         }
 
-        $statement = "INSERT INTO $tableName\n" . $setClause;
+        $whereClause = '';
+        foreach ($whereColumnNames as $column) {
+            if (empty($whereClause)) {
+                $whereClause = "WHERE $column=?";
+            } else {
+                $whereClause .= "\n\tAND $column=?";
+            }
+        }
+
+        $statement = "UPDATE $tableName\n$setClause\n$whereClause";
 
         $query = $this->conn->prepare($statement);
 
         $rows = 0;
         $line = fgets($inputHandle);
         $lineNumber = 2;
+
         while ($line !== FALSE) {
             // Skip empty lines
             if (preg_match('/^[\s,]*$/', $line)) {
@@ -191,10 +218,28 @@ class Import
             }
             $values = str_getcsv($line);
             $trimmed = array_map('trim', $values);
-            $i = 0;
-            foreach ($trimmed as $value) {
-                $query->bindValue($i + 1, $this->handleBlanks($tableName, $columnNames[$i], $value));
+            $sqlParts = explode('?', $statement);
+            $sql = '';
+
+            $i = 1;
+            foreach ($columnIndexes as $index) {
+                $query->bindValue($i, $this->handleBlanks($tableName, $columnNames[$index], $trimmed[$index]));
+                if ($dryRun) {
+                    $sql .= array_shift($sqlParts) . '"' . $trimmed[$index] . '"';
+                }
                 $i++;
+            }
+            foreach ($whereColumnIndexes as $index) {
+                $query->bindValue($i, $this->handleBlanks($tableName, $whereColumnNames[$index], $trimmed[$index]));
+                if ($dryRun) {
+                    $sql .= array_shift($sqlParts) . '"' . $trimmed[$index] . '"';
+                }
+                $i++;
+            }
+            if($dryRun) {
+                echo "-----------------------------------------------\nGenerated query (add -f to force):\n-----------------------------------------------\n",
+                    $sql,";\n-----------------------------------------------";
+                exit;
             }
             try {
                 $query->execute();

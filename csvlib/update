@@ -2,4 +2,4 @@
 <?php
 require_once 'vendor/autoload.php';
 $appBase = __DIR__;
-\MatthewFleming\CSVLib\Import::run();
+\MatthewFleming\CSVLib\Update::run();
