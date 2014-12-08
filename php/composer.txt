@@ -1,0 +1,3 @@
+Set global composer config to use https only
+/usr/local/bin/composer config --global repositories.packagist composer https://packagist.org
+/usr/local/bin/composer config --global github-protocols https

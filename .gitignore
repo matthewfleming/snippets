@@ -20,3 +20,6 @@ build/
 
 # SASS
 .sass-cache/
+
+#temp files
+temp/
