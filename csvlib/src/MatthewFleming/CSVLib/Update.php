@@ -122,6 +122,13 @@ class Update
         if (!$tableName || !$fileName) {
             self::stop($options, 'Required operands table-name & file-name not provided');
         }
+        if(!file_exists($fileName)) {
+            self::stop($options, "File '$fileName' does not exist");
+        }
+        if(empty($whereColumns)){
+            self::stop($options, "You must choose columns to appear in the WHERE clause\n"
+                . "e.g. -w 1,3 to use columns 1 and 3");
+        }
         $update->update($tableName, $fileName, $whereColumns);
     }
 
