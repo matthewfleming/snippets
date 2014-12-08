@@ -154,7 +154,7 @@ class Update
         $dryRun = ($this->options['f'] < 1);
         $inputHandle = fopen($filename, "r");
         if (!$inputHandle) {
-            throw new \Exception('Unable to open filename: "' . basename($filename) . '" in ' . realpath(dirname($filename)));
+            throw new \Exception('Unable to open file: "' . realpath(dirname($filename)) . "/" . basename($filename));
         }
         $columnNames = fgetcsv($inputHandle);
         $invalid = null;

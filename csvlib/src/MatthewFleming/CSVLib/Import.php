@@ -119,6 +119,9 @@ class Import
         if (!$tableName || !$fileName) {
             self::stop($options, 'Required operands table-name & file-name not provided');
         }
+        if (!file_exists($fileName)) {
+            self::stop($options, "File '$fileName' does not exist");
+        }
         $import->import($tableName, $fileName);
     }
 
@@ -143,7 +146,7 @@ class Import
     {
         $inputHandle = fopen($filename, "r");
         if (!$inputHandle) {
-            throw new \Exception('Filename: "' . basename($filename) . '" does not exist in ' . realpath(dirname($filename)));
+            throw new \Exception('Unable to open file: "' . realpath(dirname($filename)) . "/" . basename($filename));
         }
         $columnNames = fgetcsv($inputHandle);
         $invalid = null;
