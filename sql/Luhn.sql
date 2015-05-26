@@ -31,11 +31,11 @@ FROM (
 
 -- ODD LENGTH NUMBER
 SELECT
-	SubscriptionId as 'SubscriptionID',
-	Padded + CAST(MOD(9*(d1+d2+d3+d4+d5+d6+d7),10) AS CHAR(1)) AS 'Reference Number'
+    SubscriptionId as 'SubscriptionID',
+    Padded + CAST(MOD(9*(d1+d2+d3+d4+d5+d6+d7),10) AS CHAR(1)) AS 'Reference Number'
 FROM (
     SELECT
-        SubscriptionID, Padded, CAST(c1 AS INT) as d1,
+        SubscriptionID, Padded,
         DECODE(c1,'0',0,'1',2,'2',4,'3',6,'4',8,'5',1,'6',3,'7',5,'8',7,'9',9) as d1,
         CAST(c2 AS INT) as d2,
         DECODE(c3,'0',0,'1',2,'2',4,'3',6,'4',8,'5',1,'6',3,'7',5,'8',7,'9',9) as d3,
