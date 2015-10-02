@@ -6,7 +6,7 @@ _lock_and_run() {
 # establish the non blocking lock and run the function above
 LOCKFILE=/tmp/`basename $0`.lock
 (
-    flock -n 9 || exit 1
+    flock -nx 9 || exit 1
     trap "rm -f $LOCKFILE" EXIT
     _lock_and_run
 ) 9>$LOCKFILE

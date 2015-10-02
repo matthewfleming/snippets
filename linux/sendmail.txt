@@ -1,0 +1,36 @@
+
+From: http://www.dslreports.com/forum/r22817437-Sendmail-Limit-Sending-To-Domain
+
+This needs to go directly below:
+# delimiter (operator) characters (old $o macro)
+O OperatorChars=.:%@!^/[]+
+
+#####################################################################
+# BEGIN EXTERNAL DOMAIN BLOCKING HACK
+#####################################################################
+
+SGet_domain
+R$*						$: $>3 $1				focus on host
+R$* <@ $+. > $*			$1 <@ $2> $3			strip trailing dots
+R$* <@ $+ > $*			$: $2					isolate the host
+R$* . $+ . $+			$@ $2 . $3				strip host and subdomains
+
+SGet_user
+R$*						$: $>3 $1				focus on host
+R$* <@ $+ > $*			$@ $1					discard host
+
+Scheck_compat
+R$* $| $*		$: $1 $|  $>Get_domain $2		fetch recipient domain
+R$* $| $=w		$@ ok							local is okay
+R$* $| $m		$@ ok							local is okay
+# This is for client domains.  Whitelist domains everyone can send to.
+R$* $| wanews.com.au	$@ ok
+# This is for managers.  Whitelist everyone who can email anyone.
+#R$* $| $*		$: $>Get_user $1				fetch sender user
+#Rmanager_username    $@ ok
+# This blocks everyone.  Whitelisting of domains and managers needs to happen above this.
+R$+		$#error $@ 5.1.3 $: "operator may not mail offsite"
+
+#####################################################################
+# END EXTERNAL DOMAIN BLOCKING HACK
+#####################################################################

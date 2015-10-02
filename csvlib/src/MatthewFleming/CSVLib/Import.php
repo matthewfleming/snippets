@@ -16,6 +16,7 @@ use Ulrichsg\Getopt\Option;
 
 class Import
 {
+
     /**
      *
      * @var Connection
@@ -70,7 +71,11 @@ class Import
 
     public function __construct($connectionName, $options, $params)
     {
-        $this->conn = Database::getConnecion($connectionName);
+        try {
+            $this->conn = Database::getConnecion($connectionName);
+        } catch (\Exception $e) {
+            self::stop($options, $e->getMessage());
+        }
         $this->options = $options;
         $this->params = $params;
     }
@@ -79,7 +84,9 @@ class Import
     {
         $getopt = new Getopt(array(
             new Option('c', 'connection', Getopt::REQUIRED_ARGUMENT, 'Name of connection defined in parameters.yml'),
-            new Option('h', 'help', Getopt::NO_ARGUMENT, 'Display help text')
+            new Option('f', 'disable-foreign-keys', Getopt::NO_ARGUMENT, 'Disable foreign key checking'),
+            new Option('h', 'help', Getopt::NO_ARGUMENT, 'Display help text'),
+            new Option('l', 'list-connections', Getopt::NO_ARGUMENT, 'list connections')
         ));
         $getopt->setBanner("Usage: %s [options] table-name file-name\n");
         $getopt->parse();
@@ -95,14 +102,31 @@ class Import
         exit(1);
     }
 
+    public static function listConnections($params)
+    {
+        foreach ($params['connection'] as $name => $values) {
+            echo "\n---- $name ----\n";
+            foreach ($values as $key => $value) {
+                echo "$key: $value\n";
+            }
+        }
+
+        echo "\nDefault connection: {$params['default']['connection']}\n";
+
+        exit(0);
+    }
+
     public static function run()
     {
         global $appBase;
         $params = Yaml::parse($appBase . '/config/parameters.yml');
 
         $options = self::parseOptions();
+        if ($options['l']) {
+            self::listConnections($params);
+        }
         if ($options['h']) {
-            $this->exit();
+            self::stop($options);
         }
         if ($options['c']) {
             $conn = $options['c'];
@@ -142,24 +166,34 @@ class Import
         return $trimmed;
     }
 
+    private function disableForeignKeyChecks()
+    {
+        $this->conn->executeQuery('SET foreign_key_checks = 0');
+    }
+
     private function import($tableName, $filename)
     {
         $inputHandle = fopen($filename, "r");
         if (!$inputHandle) {
             throw new \Exception('Unable to open file: "' . realpath(dirname($filename)) . "/" . basename($filename));
         }
-        $columnNames = fgetcsv($inputHandle);
-        $invalid = null;
+
         if (!$this->validateTable($tableName)) {
             $msg = 'Invalid table name';
             throw new \Exception($msg);
         }
+
+        $columnNames = array_map('trim', fgetcsv($inputHandle));
+        $invalid = null;
         if (!$this->validateColumns($tableName, $columnNames, $invalid)) {
             $msg = 'Invalid column names:';
             foreach ($invalid as $column) {
                 $msg .= ' ' . $column;
             }
             throw new \Exception($msg);
+        }
+        if ($this->options['f']) {
+            $this->disableForeignKeyChecks();
         }
 
         $setClause = '';

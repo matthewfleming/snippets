@@ -10,3 +10,12 @@ connection:
         user:   'user'
         pass:   'pass'
         db:     'db_name'
+    connection2:
+        type:   'doctrine-over-ssh'
+        driver: 'pdo_mysql'
+        host:   'host'
+        port:   3306
+        user:   'user'
+        pass:   'pass'
+        db:     'db_name'
+        local-port: 3307
