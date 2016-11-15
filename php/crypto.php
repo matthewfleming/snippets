@@ -163,8 +163,8 @@ function demo_encode() {
 //encryption_info();
 
 //echo psuedo_random_hex_bytes(32);
-
-for($i=0;$i<100; $i++) {
-    echo psuedo_random_number(100, 999) . "\n";
-
-}
+//
+//for($i=0;$i<100; $i++) {
+//    echo psuedo_random_number(100, 999) . "\n";
+//
+//}

@@ -1,6 +1,10 @@
 <?php
 
-$fp = fopen("lock.txt", "a+");
+$fp = fopen("lock.txt", "r+");
+
+if (!$fp) {
+    echo 'Unable to open file';
+}
 
 if (flock($fp, LOCK_EX)) {  // acquire an exclusive lock
     fwrite($fp, "FLOCK1: lock obtained\n");

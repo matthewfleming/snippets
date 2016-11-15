@@ -1,0 +1,2 @@
+stat1.php writing to fileCK1: lock obtained
+stat1.php writing to filestat1.php writing to filestat1.php writing to filestat1.php writing to filestat1.php writing to filestat1.php writing to filestat1.php writing to file

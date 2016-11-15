@@ -1,6 +1,16 @@
 # Rewrite any uppercase urls to lowercase
 # The negative condition is to allow uppercases in filenames
+RewriteEngine On
 RewriteMap tolower int:tolower
 RewriteCond %{REQUEST_URI} [A-Z]
 RewriteCond %{REQUEST_URI} ![\w]+\.[\w]+$
 RewriteRule .* ${tolower:%{REQUEST_URI}} [R=301,L]
+
+# Rewrite all incoming http requests to https
+<VirtualHost _default_:80>
+  RewriteEngine On
+
+  # Redirect to HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=permanent,L]
+</VirtualHost>

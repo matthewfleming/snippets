@@ -1,14 +1,27 @@
 <?php
 
-$fp = fopen("lock.txt", "a+");
+define('WAIT', 10);
 
-if (flock($fp, LOCK_EX)) {  // acquire an exclusive lock
-    fwrite($fp, "FLOCK1: lock obtained\n");
-    fflush($fp);            // flush output before releasing the lock
-    sleep(10);
-    flock($fp, LOCK_UN);    // release the lock
-} else {
-    echo "Couldn't get the lock!";
+function doStats(&$stats)
+{
+    clearstatcache();
+    if (!file_exists(FILENAME)) {
+        echo "File does not exist\n";
+        return;
+    }
+    $stat = stat(FILENAME);
+    $oldStat = end($stats);
+    if ($oldStat) {
+        foreach ($stat as $key => $val) {
+            if (is_string($key)) {
+                $diff = $val - $oldStat[$key];
+                if ($diff) {
+                    echo "$key: $diff\n";
+                }
+            }
+        }
+    } else {
+        print_r($stat);
+    }
+    $stats[] = $stat;
 }
-
-fclose($fp);

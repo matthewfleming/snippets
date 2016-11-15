@@ -1,37 +1,44 @@
 <html>
-<head>
-	<style>
-		.table {
-			display:table;
-		}
-		.table-row {
-			display:table-row;
-		}
-		.table-cell {
-			display:table-cell;
-		}
-	</style>
-</head>
-<body>
-	<div class="table">
-		<div class="table-row">
-			<div class="table-cell">Td cell1</div>
-			<div class="table-cell">Td cell2</div>
-		</div>
-		<div class="table-row">
-			<div class="table-cell"></div>
-			<div class="table-cell">Td cell2</div>
-		</div>
-	</div>
-	
-	<div style="width:150px">
-		<div style="background:red;height:90px;width:50px;float:left;"></div>
-		<div style="background:blue;height:80px;width:50px;float:left;"></div>
-		<div style="background:green;height:70px;width:50px;float:left;"></div>
-		<div style="background:red;height:50px;width:50px;float:left;"></div>
-		<div style="background:blue;height:60px;width:50px;float:left;"></div>
-		<div style="background:green;height:70px;width:50px;float:left;"></div>
+    <head>
+        <style>
+            .table {
+                display:table;
+            }
+            .table-row {
+                display:table-row;
+            }
+            .table-cell {
+                display:table-cell;
+            }
+        </style>
+    </head>
+    <body>
+        <script id="table-template" type="text/template">
+            <table>
+                <tr>
+                    <th>Header 1</th>
+                </tr>
+                <tr>
+                    <td class="firstName"></td>
+                    <td class="surName"></td>
+                </tr>
+            </table>
+        </script>
+        <script>
+            var tableName = 'table-template';
+            var template = document.getElementById(tableName).innerHTML;
+            var newTable = document.createElement('div');
+            newTable.id = 'some-table';
+            newTable.innerHTML = template;
 
-	</div>
-</body>
+            var data = {firstName: "Bob", surName: "Smtih"};
+            for (var param in data) {
+                var elements = newTable.getElementsByClassName(param);
+                if (0 in elements) {
+                    elements[0].innerHTML = data[param];
+                }
+            }
+            document.body.appendChild(newTable);
+        </script>
+    </body>
 </html>
