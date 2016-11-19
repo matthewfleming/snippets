@@ -1,29 +1,33 @@
 #!/bin/bash
 function drawProgress {
+    local i percent start width progress
     if [ $1 -gt 100 ]; then
-        PERCENT=100
+        percent=100
     elif [ $1 -lt 0 ]; then
-        PERCENT=0
+        percent=0
     else
-        PERCENT=$1
+        percent=$1
     fi
-    SIZE=$2
-    START=$3
-    PROGRESS=$((PERCENT*SIZE/100))
-    END=$((START+SIZE))
-    if [ $PERCENT -eq 0 ]; then
-        STRING=""
-        for ((i=0; i<SIZE; i++)); do
-            STRING+="░"
+    start=$2
+    width=$3
+    progress=$((percent*width/100))
+    if [ $percent -eq 0 ]; then
+        string=""
+        for ((i=0; i<width; i++)); do
+            string+="░"
         done
-        echo -ne "\r\033[${START}C$STRING\033[K\r\033[${START}C"
+        echo -ne "\r\033[${start}C$string\033[K\r\033[${start}C"
     else
-        STRING=""
-        for ((i=0; i<PROGRESS; i++)); do
-            STRING+="▓"
+        string=""
+        for ((i=0; i<progress; i++)); do
+            string+="▓"
         done
-        echo -ne "\r\033[${START}C$STRING$PERCENT%"
+        echo -ne "\r\033[${start}C$string$percent%"
     fi
+}
+
+function drawProgressByRecord {
+    drawProgress $((100*$1/$2)) $3 $4
 }
 
 function drawBorder {
@@ -51,19 +55,59 @@ function statusProgress {
     fi
     echo -e "Task:     ${@:2}\033[K"
     echo -ne "Progress: "
-    drawProgress $1 $proWidth 10
+    drawProgress $1 10 $proWidth  
 }
 
-tasks=(
-    'Reticulating Splines'
-    'Extracting Resources'
-    'Factoring Pay Scale'
-    'Lecturing Errant Subsystems'
-    'Mixing Genetic Pool'
-    'Complete'
-)
-for i in {0..5}; do
-    statusProgress $((22*i)) ${tasks[i]}
-    sleep 1 
-done
+function statusProgressByRecord {
+    local width=$((`tput cols`-15))
+    if [ $1 -gt 0 ]; then
+        echo -ne "\033[1A\r"
+    fi
+    echo -e "Task:     ${@:3}\033[K"
+    echo -ne "Progress: "
+    drawProgressByRecord $1 $2 10 $width
+}
 
+function testStatusProgress {
+    tasks=(
+        'Reticulating Splines'
+        'Extracting Resources'
+        'Factoring Pay Scale'
+        'Lecturing Errant Subsystems'
+        'Mixing Genetic Pool'
+        'Complete'
+    )
+    for i in {0..5}; do
+        statusProgress $((22*i)) ${tasks[i]}
+        sleep 1 
+    done
+}
+
+function testDrawProgressByRecord {
+    width=$((`tput cols`-15))
+    start=10
+    total=7
+    echo -ne "Progress: "
+    for ((i=0; i<=total; i++)); do
+        drawProgressByRecord $i $total $start $width
+        sleep 1
+    done
+}
+
+function testStatusProgressByRecord {
+    tasks=(
+        'Reticulating Splines'
+        'Extracting Resources'
+        'Factoring Pay Scale'
+        'Lecturing Errant Subsystems'
+        'Mixing Genetic Pool'
+        'Complete'
+    )
+    for i in {0..5}; do
+        statusProgressByRecord $i 5 ${tasks[i]}
+        sleep 1 
+    done
+}
+#testDrawProgressByRecord 
+#testStatusProgressByRecord 
+#testStatusProgress 
