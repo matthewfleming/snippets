@@ -1,5 +1,5 @@
 #!/bin/bash
-function usage {
+usage() {
     echo "Usage: $me [OPTIONS] SFTP_URL LOCAL_DIR REMOTE_DIR [LOCAL_DB]"
     echo "Sync files from SFTP_URL between LOCAL_DIR and REMOTE_DIR, and keep history"
     echo "of local files in LOCAL_DB so files can be moved without resyncing"
@@ -14,7 +14,22 @@ function usage {
 
     exit "$2"
 }
+
+requireCommands() {
+    missingCounter=0
+    for neededCommand in $1; do
+        if ! hash "$neededCommand" >/dev/null 2>&1; then
+            printf "Command not found in PATH: %s\n" "$neededCommand" >&2
+            ((missingCounter++))
+        fi
+    done
+    if ((missingCounter > 0)); then
+        printf "%d required commands are missing in PATH, aborting\n" "$missingCounter" >&2
+        exit 1
+    fi
+}
 set +o errexit
+requireCommands 'getopt lftp'
 me=`basename $0`
 myDir=`readlink -e $0 | xargs dirname`
 short='dh'
