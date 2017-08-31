@@ -6,7 +6,8 @@ if [ "$1" = '-h' -o "$1" = '--help' ]; then
     exit
 fi
 
-awk='{ print strftime("%F %H:%M:%S%z"), $0 }'
+# ISO 8601 datetime+timezone extended format
+awk='{ print strftime("%FT%H:%M:%S%z"), $0 }'
 if [ $1 ]; then
     stdbuf -oL awk "$awk" 0>&0 >> "$1"
 else
