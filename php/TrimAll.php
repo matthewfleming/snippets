@@ -8,7 +8,7 @@ DEFINE('TRIM_BOTH', 2);
 
 /**
  * Trim all whitespace from the beginning and/or end of a string:
- *  - UTF multibyte spaces (e.g. \xc2\xa0)
+ *  - UTF multibyte spaces (e.g. \xC2\xA0)
  *  - Unicode whitespace \p{Z}
  *  - ASCII whitespace \s
  * @param string $string The string to trim
@@ -17,10 +17,9 @@ DEFINE('TRIM_BOTH', 2);
  */
 function trim_all($string, $type = TRIM_BOTH)
 {
-    $mb = "\xc2\x85|\xc2\xa0|\xe1\xa0\x8e|\xe2\x80[\x80-\x8D]|\xe2\x80\xa8|\xe2\x80\xa9|\xe2\x80\xaF|\xe2\x81\x9f|\xe2\x81\xa0|\xe3\x80\x80|\xef\xbb\xbf";
-    $all = $mb . '|\p{Z}|\s';
-    $leading = "^($all)+";
-    $trailing = "($all)+$";
+    $whitespace = "\xC2[\x85\xA0]|\xE1\xA0\x8E|\xE2\x80[\x80-\x8D\xA8\xA9\xAF]|\xE2\x81[\x9F\xA0]|\xE3\x80\x80|\xEF\xBB\xBF|\\p{Z}|\\s";
+    $leading = "^($whitespace)+";
+    $trailing = "($whitespace)+$";
     switch ($type) {
         case TRIM_LEFT:
             $pattern = $leading;
@@ -40,7 +39,7 @@ function trim_all($string, $type = TRIM_BOTH)
 
 /**
  * Trim all whitespace from the beginning of a string:
- *  - UTF multibyte spaces (e.g. \xc2\xa0)
+ *  - UTF multibyte spaces (e.g. \xC2\xA0)
  *  - Unicode whitespace \p{Z}
  *  - ASCII whitespace \s
  * @param string $string The string to trim
@@ -53,10 +52,10 @@ function trim_left($string)
 
 /**
  * Trim all whitespace from the end of a string:
- *  - UTF multibyte spaces (e.g. \xc2\xa0)
+ *  - UTF multibyte spaces (e.g. \xC2\xA0)
  *  - Unicode whitespace \p{Z}
  *  - ASCII whitespace \s
- * Trim UTF16 spaces \xc2\xa0, Unicode whitespace \p{Z}, ASCII whitespace \s from the end
+ * Trim UTF16 spaces \xC2\xA0, Unicode whitespace \p{Z}, ASCII whitespace \s from the end
  * of a string
  * @param string $string The string to trim
  * @return string The string with trailing whitespace removed
@@ -68,7 +67,7 @@ function trim_right($string)
 
 /**
  * Trim all whitespace from the beginning & end of a string:
- *  - UTF multibyte spaces (e.g. \xc2\xa0)
+ *  - UTF multibyte spaces (e.g. \xC2\xA0)
  *  - Unicode whitespace \p{Z}
  *  - ASCII whitespace \s
  * @param string $string The string to trim
