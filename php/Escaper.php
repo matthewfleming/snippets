@@ -1,6 +1,6 @@
 <?php
 
-namespace matthewfleming\php;
+namespace MatthewFleming\Php;
 
 class Escaper
 {

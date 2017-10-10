@@ -23,9 +23,11 @@
         "php": ">=5.3.2"
     },
     "autoload": {
-        "psr-0": { 
-            "Composer": "vendor/",
-            "MatthewFleming\\CSVLib\\": "src/"
+        "files": ["../php/functions.php"],
+        "psr-4": {
+            "Composer\\": "vendor/",
+            "MatthewFleming\\CSVLib\\": "src/",
+            "MatthewFleming\\PHP\\": "../php/"
         }
     },
     "bin": ["bin/composer"],

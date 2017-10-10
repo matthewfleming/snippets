@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Column;
 use Symfony\Component\Yaml\Yaml;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
+use function MatthewFleming\PHP\trim_all;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -151,7 +152,7 @@ class Import
 
     private function handleBlanks($table, $columnName, $value)
     {
-        $trimmed = trim($value);
+        $trimmed = trim_all($value);
         if ($trimmed === '0') {
             return '0';
         }
@@ -221,7 +222,7 @@ class Import
             }
             // Error on lines with unclosed quotes
             if (substr_count($line, '"') % 2 !== 0) {
-                $this->errors[$lineNumber] = trim($line) . ', Unclosed quotes';
+                $this->errors[$lineNumber] = trim_all($line) . ', Unclosed quotes';
                 $line = fgets($inputHandle);
                 $lineNumber++;
                 continue;
@@ -240,7 +241,7 @@ class Import
                 $code = $e->getPrevious()->getCode();
                 switch ($code) {
                     case 23000:
-                        $this->errors[$lineNumber] = trim($line) . ', "' . $e->getPrevious()->getMessage() . '"';
+                        $this->errors[$lineNumber] = trim_all($line) . ', "' . $e->getPrevious()->getMessage() . '"';
                         break;
                     default:
                         throw $e;
