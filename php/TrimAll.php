@@ -11,13 +11,24 @@ DEFINE('TRIM_BOTH', 2);
  *  - UTF multibyte spaces (e.g. \xC2\xA0)
  *  - Unicode whitespace \p{Z}
  *  - ASCII whitespace \s
- * @param string $string The string to trim
+ * @param mixed $string The string to trim (non-string scalars and null will be ignored, non-scalar is an error)
  * @param int $type TRIM_LEFT, TRIM_RIGHT, TRIM_BOTH
  * @return string The string with leading, trailing or leading & trailing whitespace removed
  */
 function trim_all($string, $type = TRIM_BOTH)
 {
-    $whitespace = "\xC2[\x85\xA0]|\xE1\xA0\x8E|\xE2\x80[\x80-\x8D\xA8\xA9\xAF]|\xE2\x81[\x9F\xA0]|\xE3\x80\x80|\xEF\xBB\xBF|\\p{Z}|\\s";
+    if ($string === null) {
+        return null;
+    }
+    if (!is_scalar($string)) {
+        trigger_error("Attempting to trim non-scalar type", E_USER_ERROR);
+        return $string;
+    }
+    if (!is_string($string) || $string === '') {
+        return $string;
+    }
+
+    $whitespace = '\x0|\xC2[\x85\xA0]|\xE1\xA0\x8E|\xE2\x80[\x80-\x8D\xA8\xA9\xAF]|\xE2\x81[\x9F\xA0]|\xE3\x80\x80|\xEF\xBB\xBF|\p{Z}|\s';
     $leading = "^($whitespace)+";
     $trailing = "($whitespace)+$";
     switch ($type) {

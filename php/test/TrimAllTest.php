@@ -23,12 +23,35 @@ final class TrimAllTest extends TestCase
             "\xE2\x81\x9F TEST TEN \xE2\x81\x9F" => "TEST TEN",
             "\xE2\x81\xA0 TEST ELEVEN \xE2\x81\xA0" => "TEST ELEVEN",
             "\xE3\x80\x80 TEST TWELVE \xE3\x80\x80" => "TEST TWELVE",
-            "\xEF\xBB\xBF TEST THIRTEEN \xEF\xBB\xBF" => "TEST THIRTEEN"
+            "\xEF\xBB\xBF TEST THIRTEEN \xEF\xBB\xBF" => "TEST THIRTEEN",
+            '    ' => '',
+            ' ' => '',
+            " \t\n\r\0\x0B" => '',
+            0 => 0,
+            1 => 1
         ];
 
         foreach ($tests as $test => $result) {
-            $this->assertEquals(trim_all($test), $result);
+            $this->assertEquals($result, trim_all($test));
         }
+        $this->assertEquals(null, trim_all(null));
+    }
+
+    /**
+     * @expectedException \PHPUnit\Framework\Error\Error
+     */
+    public function testTrimBothObject()
+    {
+        $obj = new \stdClass();
+        trim_all($obj);
+    }
+
+    /**
+     * @expectedException \PHPUnit\Framework\Error\Error
+     */
+    public function testTrimBothArray()
+    {
+        trim_all([]);
     }
 
 }
