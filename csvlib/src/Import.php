@@ -4,6 +4,9 @@ namespace MatthewFleming\CSVLib;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Types\DateType;
+use Doctrine\DBAL\Types\DateTimeType;
+use Doctrine\DBAL\Types\DateTimeTzType;
 use Symfony\Component\Yaml\Yaml;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
@@ -43,6 +46,11 @@ class Import
     private $columns = array();
     private $errors = array();
 
+    /**
+     * Get an array of column objects
+     * @param string $table
+     * @return Column[]
+     */
     public function getColumns($table)
     {
         if (!isset($this->columns[$table])) {
@@ -159,11 +167,23 @@ class Import
         if (strcasecmp('null', $trimmed) === 0) {
             return null;
         }
+
+        $columns = $this->getColumns($table);
+        $column = $columns[strtolower($columnName)];
+
+        // Use null instead of empty string if possible
         if ($trimmed === '') {
-            $columns = $this->getColumns($table);
-            $column = $columns[strtolower($columnName)];
             return $column->getNotNull() ? '' : null;
         }
+
+        $type = $column->getType();
+
+        // Normalise date/times
+        if ($type instanceof DateType || $type instanceof DateTimeType || $type instanceof DateTimeTzType) {
+            $date = new \DateTime($trimmed);
+            return $type->convertToDatabaseValue($date, $this->conn->getDatabasePlatform());
+        }
+
         return $trimmed;
     }
 
@@ -185,6 +205,7 @@ class Import
         }
 
         $columnNames = array_map('trim', fgetcsv($inputHandle));
+        $columnCount = count($columnNames);
         $invalid = null;
         if (!$this->validateColumns($tableName, $columnNames, $invalid)) {
             $msg = 'Invalid column names:';
@@ -230,10 +251,13 @@ class Import
             $values = str_getcsv($line);
             $trimmed = array_map('trim', $values);
             $i = 0;
-            foreach ($trimmed as $value) {
+            while ($i < $columnCount) {
+                // Set missing columns to empty string/null
+                $value = isset($trimmed[$i]) ? $trimmed[$i] : '';
                 $query->bindValue($i + 1, $this->handleBlanks($tableName, $columnNames[$i], $value));
                 $i++;
             }
+
             try {
                 $query->execute();
                 $rows += $query->rowCount();
