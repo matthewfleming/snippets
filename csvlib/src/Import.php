@@ -180,7 +180,9 @@ class Import
 
         // Normalise date/times
         if ($type instanceof DateType || $type instanceof DateTimeType || $type instanceof DateTimeTzType) {
-            $date = new \DateTime($trimmed);
+            // Get around US doing dates wrong
+            $adjusted = str_replace('/', '-', $trimmed);
+            $date = new \DateTime($adjusted);
             return $type->convertToDatabaseValue($date, $this->conn->getDatabasePlatform());
         }
 
