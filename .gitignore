@@ -23,3 +23,6 @@ build/
 
 #temp files
 temp/
+
+# Node
+node_modules/
